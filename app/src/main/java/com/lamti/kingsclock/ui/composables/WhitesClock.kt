@@ -61,7 +61,7 @@ fun WhitesClock(
                 canvasWidth / 2,
                 canvasHeight / 3.5f,
                 Paint().apply {
-                    textSize = 100f
+                    textSize = 150f
                     if (font != null) typeface = font
                     textAlign = Paint.Align.CENTER
                     isFakeBoldText = true
