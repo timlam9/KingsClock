@@ -2,11 +2,14 @@ package com.lamti.kingsclock.ui.composables
 
 import android.graphics.Paint
 import android.graphics.Typeface
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
+import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
@@ -17,7 +20,8 @@ import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.lamti.kingsclock.ui.theme.Red
+import com.lamti.kingsclock.ui.theme.LightGray
+import com.lamti.kingsclock.ui.theme.TextColor
 
 @Composable
 fun BlacksClock(
@@ -25,12 +29,17 @@ fun BlacksClock(
     clockSize: Dp,
     enabled: Boolean,
     textColor: Int,
-    indicatorColor: Color = Red,
-    strokeWidth: Float = 30f,
+    circleColor: Color = LightGray,
+    indicatorColor: Color = MaterialTheme.colors.primary,
+    strokeWidth: Float = 38f,
     font: Typeface? = null,
-    offsetY: Dp = -(clockSize / 2 + 40.dp)
+    offsetY: Dp = -(clockSize / 2 + 40.dp),
+    currentTimeMillis: Long,
+    maxTimeMillis: Long,
+    formattedTime: String
 ) {
-    val enabledColor = if (enabled) indicatorColor else Color.DarkGray
+    val enabledColor = if (enabled) indicatorColor else TextColor
+    val percentage by animateFloatAsState(currentTimeMillis.toFloat() / maxTimeMillis.toFloat())
 
     Canvas(
         modifier = modifier
@@ -42,7 +51,7 @@ fun BlacksClock(
         val canvasHeight = size.height
 
         drawCircle(
-            SolidColor(Color.Gray),
+            SolidColor(circleColor),
             clockSize.toPx() / 2,
             style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
         )
@@ -50,22 +59,23 @@ fun BlacksClock(
         drawArc(
             color = enabledColor,
             size = Size(width = clockSize.toPx(), height = clockSize.toPx()),
-            startAngle = 180f,
-            sweepAngle = -80f,
+            startAngle = 0f,
+            sweepAngle = 180f * percentage,
             useCenter = false,
-            style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
+            style = Stroke(width = strokeWidth + 30, cap = StrokeCap.Round)
         )
 
         rotate(180f) {
             drawContext.canvas.nativeCanvas.apply {
                 drawText(
-                    "10:00.00",
+                    formattedTime,
                     canvasWidth / 2,
                     canvasHeight / 3.5f,
                     Paint().apply {
-                        textSize = 150f
                         if (font != null) typeface = font
                         textAlign = Paint.Align.CENTER
+                        textSize = 150f
+                        letterSpacing = 0.1f
                         isFakeBoldText = true
                         color = textColor
                     }

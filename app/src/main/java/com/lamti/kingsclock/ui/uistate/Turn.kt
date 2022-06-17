@@ -1,6 +1,6 @@
 package com.lamti.kingsclock.ui.uistate
 
-enum class EnabledClock {
+enum class Turn {
     Blacks,
     Whites;
 
