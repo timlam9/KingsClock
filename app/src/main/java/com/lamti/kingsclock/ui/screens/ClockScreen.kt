@@ -1,9 +1,6 @@
 package com.lamti.kingsclock.ui.screens
 
-import android.content.Context
-import android.graphics.Typeface
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.AnimationVector1D
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,33 +16,29 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.lamti.kingsclock.ui.composables.AnimatedCircle
 import com.lamti.kingsclock.ui.composables.Clocks
 import com.lamti.kingsclock.ui.composables.PauseButtons
-import com.lamti.kingsclock.ui.composables.StartButton
+import com.lamti.kingsclock.ui.composables.RoundedTextButton
 import com.lamti.kingsclock.ui.theme.KingsClockTheme
 import com.lamti.kingsclock.ui.uistate.ClockState
 import com.lamti.kingsclock.ui.uistate.Timer
 import com.lamti.kingsclock.ui.uistate.Turn
-import kotlinx.coroutines.launch
 
 @Composable
-fun ClockScreen(whitesTime: Int, blacksTime: Int, font: Typeface?) {
-    val context = LocalContext.current
+fun ClockScreen(whitesTime: Int, blacksTime: Int) {
     val density = LocalDensity.current
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp.dp
     val screenHeight = configuration.screenHeightDp.dp
 
-    val blacksStartedTranslationValue = -screenHeight.value
-    val whitesStartedTranslationValue = screenHeight.value
+    val blacksStartedTranslationValue = -screenHeight
+    val whitesStartedTranslationValue = screenHeight
 
     var clockState by rememberSaveable { mutableStateOf(ClockState.Finished) }
     var turn by rememberSaveable { mutableStateOf(Turn.Whites) }
@@ -55,8 +48,20 @@ fun ClockScreen(whitesTime: Int, blacksTime: Int, font: Typeface?) {
     var showWhitesClock by rememberSaveable { mutableStateOf(false) }
 
     val scaleStartButton by animateFloatAsState(if (showStartButton) 1f else 0f)
-    val blacksClockTranslationY = remember { Animatable(blacksStartedTranslationValue) }
-    val whitesClockTranslationY = remember { Animatable(whitesStartedTranslationValue) }
+    val whitesClockTranslationY by animateDpAsState(
+        when (clockState) {
+            ClockState.Started -> 0.dp
+            ClockState.Paused -> whitesStartedTranslationValue
+            ClockState.Finished -> whitesStartedTranslationValue
+        }
+    )
+    val blacksClockTranslationY by animateDpAsState(
+        when (clockState) {
+            ClockState.Started -> 0.dp
+            ClockState.Paused -> blacksStartedTranslationValue
+            ClockState.Finished -> blacksStartedTranslationValue
+        }
+    )
 
     LaunchedEffect(clockState) {
         when (clockState) {
@@ -64,34 +69,16 @@ fun ClockScreen(whitesTime: Int, blacksTime: Int, font: Typeface?) {
                 showStartButton = false
                 showBlacksClock = true
                 showWhitesClock = true
-                launch {
-                    blacksClockTranslationY.animateTo(0f)
-                }
-                launch {
-                    whitesClockTranslationY.animateTo(0f)
-                }
             }
             ClockState.Paused -> {
                 showStartButton = true
                 showBlacksClock = false
                 showWhitesClock = false
-                launch {
-                    blacksClockTranslationY.animateTo(blacksStartedTranslationValue)
-                }
-                launch {
-                    whitesClockTranslationY.animateTo(whitesStartedTranslationValue)
-                }
             }
             ClockState.Finished -> {
                 showStartButton = true
                 showBlacksClock = false
                 showWhitesClock = false
-                launch {
-                    blacksClockTranslationY.animateTo(blacksStartedTranslationValue)
-                }
-                launch {
-                    whitesClockTranslationY.animateTo(whitesStartedTranslationValue)
-                }
             }
         }
     }
@@ -99,10 +86,8 @@ fun ClockScreen(whitesTime: Int, blacksTime: Int, font: Typeface?) {
     ClockScreen(
         clockState = clockState,
         turn = turn,
-        blacksClockTranslationY = blacksClockTranslationY,
         screenWidth = screenWidth,
-        context = context,
-        font = font,
+        blacksClockTranslationY = blacksClockTranslationY,
         whitesClockTranslationY = whitesClockTranslationY,
         scaleStartButton = scaleStartButton,
         showBlacksClock = showBlacksClock,
@@ -118,11 +103,9 @@ fun ClockScreen(whitesTime: Int, blacksTime: Int, font: Typeface?) {
 private fun ClockScreen(
     clockState: ClockState,
     turn: Turn,
-    blacksClockTranslationY: Animatable<Float, AnimationVector1D>,
+    blacksClockTranslationY: Dp,
+    whitesClockTranslationY: Dp,
     screenWidth: Dp,
-    context: Context,
-    font: Typeface?,
-    whitesClockTranslationY: Animatable<Float, AnimationVector1D>,
     scaleStartButton: Float,
     showBlacksClock: Boolean,
     density: Density,
@@ -135,15 +118,11 @@ private fun ClockScreen(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        if (clockState == ClockState.Started) {
-            AnimatedCircle(turn = turn, modifier = Modifier.offset { IntOffset(0, whitesClockTranslationY.value.toInt()) })
-        }
-
-        val maxTimeMillis = 5 * 60 * 1000L
+        val maxTimeMillis = 1 * 30 * 1000L
         val whitesTimer = remember { Timer(maxTimeMillis) }
         val blacksTimer = remember { Timer(maxTimeMillis) }
 
-        LaunchedEffect(clockState) {
+        LaunchedEffect(clockState, turn) {
             when (clockState) {
                 ClockState.Started -> {
                     when (turn) {
@@ -167,36 +146,29 @@ private fun ClockScreen(
                 }
             }
         }
-        LaunchedEffect(turn) {
-            when (turn) {
-                Turn.Blacks -> {
-                    whitesTimer.pause()
-                    blacksTimer.start()
-                }
-                Turn.Whites -> {
-                    whitesTimer.start()
-                    blacksTimer.pause()
-                }
-            }
-        }
 
+        if (clockState == ClockState.Started) {
+            AnimatedCircle(
+                turn = turn,
+                modifier = Modifier.offset(y = whitesClockTranslationY)
+            )
+        }
         Clocks(
             clockState = clockState,
             onBackgroundClicked = onBackgroundClicked,
             blacksClockTranslationY = blacksClockTranslationY,
             screenWidth = screenWidth,
             turn = turn,
-            context = context,
-            font = font,
             whitesClockTranslationY = whitesClockTranslationY,
             whitesTimer = whitesTimer,
             blacksTimer = blacksTimer,
             maxTimeMillis = maxTimeMillis
         )
-        StartButton(
+        RoundedTextButton(
             modifier = Modifier.scale(scaleStartButton),
-            font = font,
-            onClick = onStartButtonClicked
+            onClick = onStartButtonClicked,
+            buttonSize = screenWidth / 1.75f,
+            text = "Play"
         )
         PauseButtons(
             showBlacksClock = showBlacksClock,
@@ -213,6 +185,6 @@ private fun ClockScreen(
 @Composable
 fun DefaultPreview() {
     KingsClockTheme {
-        ClockScreen(whitesTime = 10, blacksTime = 10, null)
+        ClockScreen(whitesTime = 10, blacksTime = 10)
     }
 }

@@ -23,7 +23,6 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         hideSystemUI()
-        val font = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) resources.getFont(R.font.fivo_sans_heavy) else null
         setContent {
             KingsClockTheme {
                 Surface(
@@ -32,8 +31,7 @@ class MainActivity : ComponentActivity() {
                 ) {
                     ClockScreen(
                         whitesTime = 10,
-                        blacksTime = 10,
-                        font = font
+                        blacksTime = 10
                     )
                 }
             }

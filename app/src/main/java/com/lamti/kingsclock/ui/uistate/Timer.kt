@@ -15,14 +15,9 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-class Timer(private val startTime: Long = 5 * 60 * 1000) {
+class Timer(private val startTime: Long) {
 
-    companion object {
-
-        const val START_TIME = "05:00:00"
-    }
-
-    var formattedTime by mutableStateOf(START_TIME)
+    var formattedTime by mutableStateOf(formatTime(startTime))
     var timeMillis by mutableStateOf(startTime)
 
     private var coroutineScope = CoroutineScope(Dispatchers.Main)
@@ -54,10 +49,9 @@ class Timer(private val startTime: Long = 5 * 60 * 1000) {
         coroutineScope = CoroutineScope(Dispatchers.Main)
         timeMillis = startTime
         lastTimestamp = 0L
-        formattedTime = START_TIME
+        formattedTime = formatTime(startTime)
         isActive = false
     }
-
 
     private fun formatTime(timeMillis: Long): String {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

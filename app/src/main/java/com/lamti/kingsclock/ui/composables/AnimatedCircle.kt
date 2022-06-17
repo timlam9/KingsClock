@@ -23,7 +23,8 @@ fun AnimatedCircle(
     val screenWidth = configuration.screenWidthDp.dp
     val screenHeight = configuration.screenHeightDp.dp
 
-    val offset by animateDpAsState(if (turn == Turn.Whites) screenHeight / 2 + 60.dp else -screenHeight / 2 - 60.dp)
+    val baseOffset = (screenHeight / 2) + 60.dp
+    val offset by animateDpAsState(if (turn == Turn.Whites) baseOffset else -baseOffset)
     val color by animateColorAsState(if (turn == Turn.Whites) MaterialTheme.colors.onPrimary else MaterialTheme.colors.primary)
 
     Canvas(
