@@ -11,34 +11,45 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.lamti.kingsclock.ui.theme.Red
 
 @Composable
-fun RoundedIconButton(
+fun OutlineIcon(
+    modifier: Modifier = Modifier,
+    imageID: Int? = null,
     icon: ImageVector = Icons.Default.Close,
     size: Dp = 70.dp,
-    color: Color = Red,
+    borderColor: Color = Red,
+    color: Color = borderColor,
     stroke: Dp = 6.dp,
-
-    onClick: () -> Unit
+    onClick: () -> Unit = {}
 ) {
     IconButton(
-        modifier = Modifier
-            .then(Modifier.size(size))
+        modifier = modifier
+            .size(size)
             .border(
                 width = stroke,
-                color = color,
+                color = borderColor,
                 shape = RoundedCornerShape(60)
             ),
         onClick = onClick
     ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = "Rounded Image Button",
-            tint = color
-        )
+        if (imageID == null) {
+            Icon(
+                imageVector = icon,
+                contentDescription = "Rounded Image Button",
+                tint = color
+            )
+        } else {
+            Icon(
+                painter = painterResource(id = imageID),
+                contentDescription = "Rounded Image Button",
+                tint = color
+            )
+        }
     }
 }
 

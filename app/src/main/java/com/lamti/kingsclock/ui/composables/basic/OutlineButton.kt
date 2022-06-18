@@ -23,8 +23,8 @@ fun OutlinedButton(
     width: Dp = 150.dp,
     height: Dp = 70.dp,
     fontSize: TextUnit = 30.sp,
-    textColor: Color = MaterialTheme.colors.primary,
     color: Color = MaterialTheme.colors.primary,
+    textColor: Color = color,
     shape: Shape = MaterialTheme.shapes.medium.copy(CornerSize(60)),
     stroke: Dp = 6.dp,
     onclick: () -> Unit

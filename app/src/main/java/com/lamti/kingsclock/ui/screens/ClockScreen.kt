@@ -1,10 +1,20 @@
 package com.lamti.kingsclock.ui.screens
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -19,11 +29,17 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.lamti.kingsclock.R
 import com.lamti.kingsclock.ui.composables.Clocks
 import com.lamti.kingsclock.ui.composables.FinishButtons
 import com.lamti.kingsclock.ui.composables.PauseButtons
 import com.lamti.kingsclock.ui.composables.basic.AnimatedCircle
+import com.lamti.kingsclock.ui.composables.basic.OutlineIcon
+import com.lamti.kingsclock.ui.composables.basic.OutlinedButton
 import com.lamti.kingsclock.ui.composables.basic.RoundedTextButton
+import com.lamti.kingsclock.ui.theme.Blue
+import com.lamti.kingsclock.ui.theme.Green
 import com.lamti.kingsclock.ui.theme.KingsClockTheme
 import com.lamti.kingsclock.ui.uistate.ClockState
 import com.lamti.kingsclock.ui.uistate.Timer
@@ -41,13 +57,38 @@ fun ClockScreen() {
     var clockState by rememberSaveable { mutableStateOf(ClockState.Paused) }
     var turn by rememberSaveable { mutableStateOf(Turn.Whites) }
 
-    var showStartButton by rememberSaveable { mutableStateOf(false) }
+    var showPauseWidgets by rememberSaveable { mutableStateOf(false) }
     var showBlacksClock by rememberSaveable { mutableStateOf(false) }
     var showWhitesClock by rememberSaveable { mutableStateOf(false) }
     var showRestartButton by rememberSaveable { mutableStateOf(false) }
     var showCloseButton by rememberSaveable { mutableStateOf(false) }
 
-    val scaleStartButton by animateFloatAsState(if (showStartButton) 1f else 0f)
+    val scaleStartButton by animateFloatAsState(if (showPauseWidgets) 1f else 0f)
+    val blacksTimerTranslationX by animateDpAsState(
+        targetValue = if (showPauseWidgets) 0.dp else -screenWidth,
+        animationSpec = tween(
+            durationMillis = 150,
+            delayMillis = if (showPauseWidgets) 100 else 30,
+            easing = FastOutSlowInEasing
+        ),
+    )
+    val whitesTimerTranslationX by animateDpAsState(
+        targetValue = if (showPauseWidgets) 0.dp else -screenWidth,
+        animationSpec = tween(
+            durationMillis = 150,
+            delayMillis = if (showPauseWidgets) 140 else 70,
+            easing = FastOutSlowInEasing
+        ),
+    )
+    val settingsIconTranslationY by animateDpAsState(
+        targetValue = if (showPauseWidgets) screenHeight / 2.35f else screenHeight,
+        animationSpec = tween(
+            durationMillis = 100,
+            delayMillis = if (showPauseWidgets) 170 else 25,
+            easing = FastOutSlowInEasing
+        ),
+    )
+
     val whitesClockTranslationY by animateDpAsState(
         when (clockState) {
             ClockState.Started -> 0.dp
@@ -66,21 +107,21 @@ fun ClockScreen() {
     LaunchedEffect(clockState) {
         when (clockState) {
             ClockState.Started -> {
-                showStartButton = false
+                showPauseWidgets = false
                 showBlacksClock = true
                 showWhitesClock = true
                 showRestartButton = false
                 showCloseButton = false
             }
             ClockState.Paused -> {
-                showStartButton = true
+                showPauseWidgets = true
                 showBlacksClock = false
                 showWhitesClock = false
                 showRestartButton = false
                 showCloseButton = false
             }
             ClockState.Finished -> {
-                showStartButton = false
+                showPauseWidgets = false
                 showBlacksClock = true
                 showWhitesClock = true
                 showRestartButton = true
@@ -96,6 +137,9 @@ fun ClockScreen() {
         blacksClockTranslationY = blacksClockTranslationY,
         whitesClockTranslationY = whitesClockTranslationY,
         scaleStartButton = scaleStartButton,
+        blacksTimerTranslationX = blacksTimerTranslationX,
+        whitesTimerTranslationX = whitesTimerTranslationX,
+        settingsIconTranslationY = settingsIconTranslationY,
         showBlacksClock = showBlacksClock,
         showWhitesClock = showWhitesClock,
         showRestartButton = showRestartButton,
@@ -124,6 +168,9 @@ private fun ClockScreen(
     whitesClockTranslationY: Dp,
     screenWidth: Dp,
     scaleStartButton: Float,
+    blacksTimerTranslationX: Dp,
+    whitesTimerTranslationX: Dp,
+    settingsIconTranslationY: Dp,
     showBlacksClock: Boolean,
     showWhitesClock: Boolean,
     showRestartButton: Boolean,
@@ -150,7 +197,6 @@ private fun ClockScreen(
         LaunchedEffect(whitesTimer.isTimerFinished) {
             if (whitesTimer.isTimerFinished) onWhitesTimerFinished()
         }
-
         LaunchedEffect(clockState, turn) {
             when (clockState) {
                 ClockState.Started -> {
@@ -197,7 +243,56 @@ private fun ClockScreen(
             buttonSize = screenWidth / 1.75f,
             text = "Play"
         )
-        if (clockState != ClockState.Finished) {
+        Column(modifier = Modifier.offset(y = -screenWidth / 1.4f)) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .offset(x = blacksTimerTranslationX)
+                    .padding(horizontal = 20.dp)
+            ) {
+                OutlineIcon(
+                    modifier = Modifier,
+                    size = 70.dp,
+                    imageID = R.drawable.ic_rocket_launch,
+                    color = Blue,
+                    borderColor = Blue
+                )
+                Spacer(modifier = Modifier.size(10.dp))
+                OutlinedButton(
+                    modifier = Modifier.weight(1f),
+                    text = blacksTimer.formattedTime,
+                    width = screenWidth / 1.75f,
+                    fontSize = 32.sp,
+                    color = Blue,
+                    onclick = {}
+                )
+            }
+            Spacer(modifier = Modifier.size(20.dp))
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .offset(x = whitesTimerTranslationX)
+                    .padding(horizontal = 20.dp)
+            ) {
+                OutlineIcon(
+                    modifier = Modifier,
+                    size = 70.dp,
+                    imageID = R.drawable.ic_outline_rocket_launch,
+                    color = Green,
+                    borderColor = Green
+                )
+                Spacer(modifier = Modifier.size(10.dp))
+                OutlinedButton(
+                    modifier = Modifier.weight(1f),
+                    text = whitesTimer.formattedTime,
+                    width = screenWidth / 1.75f,
+                    fontSize = 32.sp,
+                    color = Green,
+                    onclick = {}
+                )
+            }
+        }
+        AnimatedVisibility(clockState != ClockState.Finished) {
             PauseButtons(
                 showBlacksClock = showBlacksClock,
                 enabledClockState = turn,
@@ -219,6 +314,12 @@ private fun ClockScreen(
                 whitesTimer.reset()
                 onCloseButtonClicked()
             }
+        )
+        OutlineIcon(
+            modifier = Modifier.offset(y = settingsIconTranslationY),
+            size = 70.dp,
+            imageID = R.drawable.ic_settings,
+            borderColor = MaterialTheme.colors.onSecondary
         )
     }
 }

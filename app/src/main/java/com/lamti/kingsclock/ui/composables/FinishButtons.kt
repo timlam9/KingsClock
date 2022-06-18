@@ -15,8 +15,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
+import com.lamti.kingsclock.ui.composables.basic.OutlineIcon
 import com.lamti.kingsclock.ui.composables.basic.OutlinedButton
-import com.lamti.kingsclock.ui.composables.basic.RoundedIconButton
 
 @Composable
 fun FinishButtons(
@@ -79,7 +79,7 @@ fun FinishButtons(
                 with(density) { 300.dp.roundToPx() }
             }
         ) {
-            RoundedIconButton(onClick = onCloseButtonClicked)
+            OutlineIcon(onClick = onCloseButtonClicked)
         }
     }
 }
