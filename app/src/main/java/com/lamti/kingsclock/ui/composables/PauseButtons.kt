@@ -6,6 +6,7 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.offset
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.platform.LocalDensity
@@ -24,6 +25,8 @@ fun PauseButtons(
     showWhitesClock: Boolean
 ) {
     val density = LocalDensity.current
+    val offsetY = remember { screenWidth / 2 }
+    val offsetX = remember { offsetY - 50.dp }
 
     AnimatedVisibility(
         visible = showBlacksClock && enabledClockState == Turn.Blacks,
@@ -37,7 +40,7 @@ fun PauseButtons(
         RoundedIcon(
             modifier = Modifier
                 .rotate(180f)
-                .offset(x = (screenWidth / 2 - 40.dp), y = screenWidth / 2 + 0.dp),
+                .offset(x = offsetX, y = offsetY),
             icon = R.drawable.ic_pause,
             color = MaterialTheme.colors.onSurface,
             tint = MaterialTheme.colors.primary,
@@ -55,7 +58,7 @@ fun PauseButtons(
     ) {
         RoundedIcon(
             modifier = Modifier
-                .offset(x = (screenWidth / 2 - 40.dp), y = screenWidth / 2 + 0.dp),
+                .offset(x = offsetX, y = offsetY),
             icon = R.drawable.ic_pause,
             color = MaterialTheme.colors.onSurface,
             tint = MaterialTheme.colors.onPrimary,
