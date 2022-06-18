@@ -18,15 +18,17 @@ import com.lamti.kingsclock.ui.theme.Red
 @Composable
 fun RoundedIconButton(
     icon: ImageVector = Icons.Default.Close,
-    size: Dp = 60.dp,
+    size: Dp = 70.dp,
     color: Color = Red,
+    stroke: Dp = 6.dp,
+
     onClick: () -> Unit
 ) {
     IconButton(
         modifier = Modifier
             .then(Modifier.size(size))
             .border(
-                width = 2.dp,
+                width = stroke,
                 color = color,
                 shape = RoundedCornerShape(60)
             ),

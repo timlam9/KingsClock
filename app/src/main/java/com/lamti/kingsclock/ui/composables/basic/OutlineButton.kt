@@ -1,7 +1,7 @@
 package com.lamti.kingsclock.ui.composables.basic
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.MaterialTheme
@@ -20,25 +20,28 @@ import androidx.compose.ui.unit.sp
 fun OutlinedButton(
     modifier: Modifier = Modifier,
     text: String,
-    fontSize: TextUnit = 20.sp,
+    width: Dp = 150.dp,
+    height: Dp = 70.dp,
+    fontSize: TextUnit = 30.sp,
     textColor: Color = MaterialTheme.colors.primary,
     color: Color = MaterialTheme.colors.primary,
-    shape: Shape = MaterialTheme.shapes.small.copy(CornerSize(60)),
-    stroke: Dp = 2.dp,
+    shape: Shape = MaterialTheme.shapes.medium.copy(CornerSize(60)),
+    stroke: Dp = 6.dp,
     onclick: () -> Unit
 ) {
     androidx.compose.material.OutlinedButton(
         onClick = onclick,
-        modifier = modifier.height(60.dp),
+        modifier = modifier.size(width, height),
         border = BorderStroke(stroke, color),
         shape = shape,
         colors = ButtonDefaults.outlinedButtonColors(backgroundColor = MaterialTheme.colors.background)
     ) {
         Text(
+            modifier = Modifier,
             text = text,
             style = MaterialTheme.typography.button.copy(
                 color = textColor,
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.ExtraBold,
                 fontSize = fontSize
             )
         )

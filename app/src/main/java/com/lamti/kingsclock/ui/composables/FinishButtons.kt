@@ -1,11 +1,15 @@
 package com.lamti.kingsclock.ui.composables
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -27,14 +31,25 @@ fun FinishButtons(
         modifier = Modifier
             .wrapContentHeight()
             .fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceEvenly
+        horizontalArrangement = Arrangement.Center
     ) {
         AnimatedVisibility(
             visible = showRestartButton,
-            enter = slideInHorizontally {
+            enter = slideInHorizontally(
+                tween(
+                    durationMillis = 120,
+                    easing = FastOutSlowInEasing
+                )
+            ) {
                 with(density) { -300.dp.roundToPx() }
             },
-            exit = slideOutHorizontally {
+            exit = slideOutHorizontally(
+                tween(
+                    durationMillis = 120,
+                    delayMillis = 50,
+                    easing = FastOutSlowInEasing
+                )
+            ) {
                 with(density) { -300.dp.roundToPx() }
             }
         ) {
@@ -43,12 +58,24 @@ fun FinishButtons(
                 onclick = onRestartButtonClicked
             )
         }
+        Spacer(modifier = Modifier.size(24.dp))
         AnimatedVisibility(
             visible = showCloseButton,
-            enter = slideInHorizontally {
+            enter = slideInHorizontally(
+                tween(
+                    durationMillis = 120,
+                    delayMillis = 50,
+                    easing = FastOutSlowInEasing
+                )
+            ) {
                 with(density) { 300.dp.roundToPx() }
             },
-            exit = slideOutHorizontally {
+            exit = slideOutHorizontally(
+                tween(
+                    durationMillis = 120,
+                    easing = FastOutSlowInEasing
+                )
+            ) {
                 with(density) { 300.dp.roundToPx() }
             }
         ) {
