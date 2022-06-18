@@ -1,4 +1,4 @@
-package com.lamti.kingsclock.ui.composables
+package com.lamti.kingsclock.ui.composables.combound
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInHorizontally

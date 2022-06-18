@@ -1,4 +1,4 @@
-package com.lamti.kingsclock.ui.composables
+package com.lamti.kingsclock.ui.composables.combound
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

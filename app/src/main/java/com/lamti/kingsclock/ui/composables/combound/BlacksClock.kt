@@ -1,4 +1,4 @@
-package com.lamti.kingsclock.ui.composables
+package com.lamti.kingsclock.ui.composables.combound
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -15,6 +15,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
@@ -25,17 +26,19 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.lamti.kingsclock.ui.theme.DarkRed
 import com.lamti.kingsclock.ui.theme.LightGray
 import com.lamti.kingsclock.ui.theme.TextColor
 
 @Composable
-fun WhitesClock(
+fun BlacksClock(
     modifier: Modifier = Modifier,
+    clockSize: Dp,
     enabled: Boolean,
     strokeCircleColor: Color = LightGray,
-    indicatorColor: Color = MaterialTheme.colors.onPrimary,
+    indicatorColor: Color = MaterialTheme.colors.primary,
     strokeWidth: Float = 38f,
     currentTimeMillis: Long,
     maxTimeMillis: Long,
@@ -44,6 +47,7 @@ fun WhitesClock(
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp.dp
 
+    val textColor = if (enabled) MaterialTheme.colors.background else TextColor
     val enabledColor = if (enabled) indicatorColor else TextColor
     val percentage by animateFloatAsState(currentTimeMillis.toFloat() / maxTimeMillis.toFloat())
 
@@ -55,20 +59,12 @@ fun WhitesClock(
             easing = FastOutSlowInEasing
         )
     )
-    val textColor by animateColorAsState(
-        if (enabled) MaterialTheme.colors.background else TextColor,
-        animationSpec = tween(
-            durationMillis = 350,
-            delayMillis = 0,
-            easing = FastOutSlowInEasing
-        )
-    )
 
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .height(screenWidth)
-            .offset(y = screenWidth / 2)
+            .height(clockSize)
+            .offset(y = -(clockSize / 2))
             .drawBehind {
                 drawCircle(
                     SolidColor(if (formattedTime == "time's up".uppercase()) DarkRed else bgCircleColor),
@@ -77,13 +73,13 @@ fun WhitesClock(
                 )
                 drawCircle(
                     SolidColor(strokeCircleColor),
-                    screenWidth.toPx() / 2,
+                    clockSize.toPx() / 2,
                     style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
                 )
                 drawArc(
                     color = enabledColor,
-                    size = Size(width = screenWidth.toPx(), height = screenWidth.toPx()),
-                    startAngle = 180f,
+                    size = Size(width = clockSize.toPx(), height = clockSize.toPx()),
+                    startAngle = 0f,
                     sweepAngle = 180f * percentage,
                     useCenter = false,
                     style = Stroke(width = strokeWidth + 30, cap = StrokeCap.Round)
@@ -93,7 +89,9 @@ fun WhitesClock(
     ) {
         Text(
             text = formattedTime,
-            modifier = Modifier.offset(y = -screenWidth / 5),
+            modifier = Modifier
+                .rotate(180f)
+                .offset(y = -screenWidth / 5),
             style = MaterialTheme.typography.h3.copy(
                 color = if (formattedTime == "time's up".uppercase()) strokeCircleColor else textColor,
                 fontWeight = FontWeight.SemiBold,

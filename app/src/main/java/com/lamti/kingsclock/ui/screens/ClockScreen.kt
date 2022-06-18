@@ -31,22 +31,23 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lamti.kingsclock.R
-import com.lamti.kingsclock.ui.composables.Clocks
-import com.lamti.kingsclock.ui.composables.FinishButtons
-import com.lamti.kingsclock.ui.composables.PauseButtons
 import com.lamti.kingsclock.ui.composables.basic.AnimatedCircle
 import com.lamti.kingsclock.ui.composables.basic.OutlineIcon
 import com.lamti.kingsclock.ui.composables.basic.OutlinedButton
 import com.lamti.kingsclock.ui.composables.basic.RoundedTextButton
+import com.lamti.kingsclock.ui.composables.combound.Clocks
+import com.lamti.kingsclock.ui.composables.combound.FinishButtons
+import com.lamti.kingsclock.ui.composables.combound.PauseButtons
 import com.lamti.kingsclock.ui.theme.Blue
 import com.lamti.kingsclock.ui.theme.Green
 import com.lamti.kingsclock.ui.theme.KingsClockTheme
+import com.lamti.kingsclock.ui.uistate.ChessClock
 import com.lamti.kingsclock.ui.uistate.ClockState
 import com.lamti.kingsclock.ui.uistate.Timer
 import com.lamti.kingsclock.ui.uistate.Turn
 
 @Composable
-fun ClockScreen() {
+fun ClockScreen(chessClock: ChessClock, onSettingsClicked: () -> Unit) {
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp.dp
     val screenHeight = configuration.screenHeightDp.dp
@@ -133,6 +134,7 @@ fun ClockScreen() {
     ClockScreen(
         clockState = clockState,
         turn = turn,
+        maxTimeMillis = (chessClock.minutes * 60 * 1000L) + (chessClock.seconds * 1000L),
         screenWidth = screenWidth,
         blacksClockTranslationY = blacksClockTranslationY,
         whitesClockTranslationY = whitesClockTranslationY,
@@ -157,6 +159,7 @@ fun ClockScreen() {
             turn = Turn.Whites
             clockState = ClockState.Paused
         },
+        onSettingsClicked = onSettingsClicked
     )
 }
 
@@ -164,6 +167,7 @@ fun ClockScreen() {
 private fun ClockScreen(
     clockState: ClockState,
     turn: Turn,
+    maxTimeMillis: Long,
     blacksClockTranslationY: Dp,
     whitesClockTranslationY: Dp,
     screenWidth: Dp,
@@ -182,12 +186,12 @@ private fun ClockScreen(
     onWhitesTimerFinished: () -> Unit,
     onRestartButtonClicked: () -> Unit,
     onCloseButtonClicked: () -> Unit,
+    onSettingsClicked: () -> Unit,
 ) {
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        val maxTimeMillis = 1 * 12 * 1000L
         val whitesTimer = remember { Timer(maxTimeMillis) }
         val blacksTimer = remember { Timer(maxTimeMillis) }
 
@@ -257,7 +261,7 @@ private fun ClockScreen(
                     color = Blue,
                     borderColor = Blue
                 )
-                Spacer(modifier = Modifier.size(10.dp))
+                Spacer(modifier = Modifier.size(20.dp))
                 OutlinedButton(
                     modifier = Modifier.weight(1f),
                     text = blacksTimer.formattedTime,
@@ -281,7 +285,7 @@ private fun ClockScreen(
                     color = Green,
                     borderColor = Green
                 )
-                Spacer(modifier = Modifier.size(10.dp))
+                Spacer(modifier = Modifier.size(20.dp))
                 OutlinedButton(
                     modifier = Modifier.weight(1f),
                     text = whitesTimer.formattedTime,
@@ -319,7 +323,8 @@ private fun ClockScreen(
             modifier = Modifier.offset(y = settingsIconTranslationY),
             size = 70.dp,
             imageID = R.drawable.ic_settings,
-            borderColor = MaterialTheme.colors.onSecondary
+            borderColor = MaterialTheme.colors.onSecondary,
+            onClick = onSettingsClicked
         )
     }
 }
@@ -328,6 +333,8 @@ private fun ClockScreen(
 @Composable
 fun DefaultPreview() {
     KingsClockTheme {
-        ClockScreen()
+        ClockScreen(ChessClock(10, 0)) {
+
+        }
     }
 }
