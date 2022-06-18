@@ -37,7 +37,7 @@ fun BlacksClock(
     modifier: Modifier = Modifier,
     clockSize: Dp,
     enabled: Boolean,
-    circleColor: Color = LightGray,
+    strokeCircleColor: Color = LightGray,
     indicatorColor: Color = MaterialTheme.colors.primary,
     strokeWidth: Float = 38f,
     currentTimeMillis: Long,
@@ -67,12 +67,12 @@ fun BlacksClock(
             .offset(y = -(clockSize / 2))
             .drawBehind {
                 drawCircle(
-                    SolidColor(bgCircleColor),
+                    SolidColor(if (formattedTime == "time's up".uppercase()) DarkRed else bgCircleColor),
                     screenWidth.toPx() / 2,
                     style = Fill,
                 )
                 drawCircle(
-                    SolidColor(circleColor),
+                    SolidColor(strokeCircleColor),
                     clockSize.toPx() / 2,
                     style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
                 )
@@ -93,7 +93,7 @@ fun BlacksClock(
                 .rotate(180f)
                 .offset(y = -screenWidth / 5),
             style = MaterialTheme.typography.h3.copy(
-                color = if (formattedTime == "time's up".uppercase()) DarkRed else textColor,
+                color = if (formattedTime == "time's up".uppercase()) strokeCircleColor else textColor,
                 fontWeight = FontWeight.SemiBold,
                 fontFamily = FontFamily.Monospace,
                 textAlign = TextAlign.Center,

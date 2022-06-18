@@ -37,7 +37,7 @@ fun PauseButtons(
         RoundedIcon(
             modifier = Modifier
                 .rotate(180f)
-                .offset(x = (screenWidth / 2 - 40.dp), y = screenWidth / 2 + 40.dp),
+                .offset(x = (screenWidth / 2 - 40.dp), y = screenWidth / 2 + 0.dp),
             icon = R.drawable.ic_pause,
             color = MaterialTheme.colors.onSurface,
             tint = MaterialTheme.colors.primary,
@@ -55,7 +55,7 @@ fun PauseButtons(
     ) {
         RoundedIcon(
             modifier = Modifier
-                .offset(x = (screenWidth / 2 - 40.dp), y = screenWidth / 2 + 40.dp),
+                .offset(x = (screenWidth / 2 - 40.dp), y = screenWidth / 2 + 0.dp),
             icon = R.drawable.ic_pause,
             color = MaterialTheme.colors.onSurface,
             tint = MaterialTheme.colors.onPrimary,

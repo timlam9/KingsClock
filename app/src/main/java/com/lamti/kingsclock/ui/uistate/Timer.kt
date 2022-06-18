@@ -69,7 +69,7 @@ class Timer(private val startTime: Long) {
                 ZoneId.systemDefault()
             )
             val formatter = DateTimeFormatter.ofPattern(
-                "mm:ss:SS",
+                "mm:ss.S",
                 Locale.getDefault()
             )
             localDateTime.format(formatter)

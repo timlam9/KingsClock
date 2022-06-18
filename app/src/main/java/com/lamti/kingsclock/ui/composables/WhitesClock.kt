@@ -34,7 +34,7 @@ import com.lamti.kingsclock.ui.theme.TextColor
 fun WhitesClock(
     modifier: Modifier = Modifier,
     enabled: Boolean,
-    circleColor: Color = LightGray,
+    strokeCircleColor: Color = LightGray,
     indicatorColor: Color = MaterialTheme.colors.onPrimary,
     strokeWidth: Float = 38f,
     currentTimeMillis: Long,
@@ -71,12 +71,12 @@ fun WhitesClock(
             .offset(y = screenWidth / 2)
             .drawBehind {
                 drawCircle(
-                    SolidColor(bgCircleColor),
+                    SolidColor(if (formattedTime == "time's up".uppercase()) DarkRed else bgCircleColor),
                     screenWidth.toPx() / 2,
                     style = Fill,
                 )
                 drawCircle(
-                    SolidColor(circleColor),
+                    SolidColor(strokeCircleColor),
                     screenWidth.toPx() / 2,
                     style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
                 )
@@ -95,7 +95,7 @@ fun WhitesClock(
             text = formattedTime,
             modifier = Modifier.offset(y = -screenWidth / 5),
             style = MaterialTheme.typography.h3.copy(
-                color = if (formattedTime == "time's up".uppercase()) DarkRed else textColor,
+                color = if (formattedTime == "time's up".uppercase()) strokeCircleColor else textColor,
                 fontWeight = FontWeight.SemiBold,
                 fontFamily = FontFamily.Monospace,
                 textAlign = TextAlign.Center,
