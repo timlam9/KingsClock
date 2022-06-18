@@ -1,4 +1,4 @@
-package com.lamti.kingsclock.ui.composables
+package com.lamti.kingsclock.ui.composables.basic
 
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable

@@ -28,6 +28,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.lamti.kingsclock.ui.theme.DarkRed
 import com.lamti.kingsclock.ui.theme.LightGray
 import com.lamti.kingsclock.ui.theme.TextColor
 
@@ -92,7 +93,7 @@ fun BlacksClock(
                 .rotate(180f)
                 .offset(y = -screenWidth / 5),
             style = MaterialTheme.typography.h3.copy(
-                color = textColor,
+                color = if (formattedTime == "time's up".uppercase()) DarkRed else textColor,
                 fontWeight = FontWeight.SemiBold,
                 fontFamily = FontFamily.Monospace,
                 textAlign = TextAlign.Center,

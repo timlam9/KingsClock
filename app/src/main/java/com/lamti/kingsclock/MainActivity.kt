@@ -29,10 +29,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background
                 ) {
-                    ClockScreen(
-                        whitesTime = 10,
-                        blacksTime = 10
-                    )
+                    ClockScreen()
                 }
             }
         }

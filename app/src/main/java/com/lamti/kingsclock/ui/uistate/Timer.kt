@@ -19,6 +19,7 @@ class Timer(private val startTime: Long) {
 
     var formattedTime by mutableStateOf(formatTime(startTime))
     var timeMillis by mutableStateOf(startTime)
+    var isTimerFinished by mutableStateOf(false)
 
     private var coroutineScope = CoroutineScope(Dispatchers.Main)
     private var isActive = false
@@ -35,7 +36,14 @@ class Timer(private val startTime: Long) {
                 delay(10L)
                 timeMillis -= System.currentTimeMillis() - lastTimestamp
                 lastTimestamp = System.currentTimeMillis()
-                formattedTime = formatTime(timeMillis)
+
+                formattedTime = if (timeMillis <= 0) {
+                    pause()
+                    isTimerFinished = true
+                    "time's up".uppercase()
+                } else {
+                    formatTime(timeMillis)
+                }
             }
         }
     }
@@ -51,6 +59,7 @@ class Timer(private val startTime: Long) {
         lastTimestamp = 0L
         formattedTime = formatTime(startTime)
         isActive = false
+        isTimerFinished = false
     }
 
     private fun formatTime(timeMillis: Long): String {

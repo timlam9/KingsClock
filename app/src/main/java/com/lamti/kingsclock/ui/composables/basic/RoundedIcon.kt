@@ -1,4 +1,4 @@
-package com.lamti.kingsclock.ui.composables
+package com.lamti.kingsclock.ui.composables.basic
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable

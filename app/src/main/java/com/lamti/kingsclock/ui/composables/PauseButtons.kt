@@ -8,21 +8,23 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.unit.Density
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.lamti.kingsclock.R
+import com.lamti.kingsclock.ui.composables.basic.RoundedIcon
 import com.lamti.kingsclock.ui.uistate.Turn
 
 @Composable
 fun PauseButtons(
     showBlacksClock: Boolean,
     enabledClockState: Turn,
-    density: Density,
     screenWidth: Dp,
     onPauseButtonClicked: () -> Unit,
     showWhitesClock: Boolean
 ) {
+    val density = LocalDensity.current
+
     AnimatedVisibility(
         visible = showBlacksClock && enabledClockState == Turn.Blacks,
         enter = slideInHorizontally {
