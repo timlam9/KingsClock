@@ -41,7 +41,6 @@ import com.lamti.kingsclock.ui.composables.combound.FinishButtons
 import com.lamti.kingsclock.ui.composables.combound.PauseButtons
 import com.lamti.kingsclock.ui.drawColoredShadow
 import com.lamti.kingsclock.ui.theme.Blue
-import com.lamti.kingsclock.ui.theme.Green
 import com.lamti.kingsclock.ui.theme.KingsClockTheme
 import com.lamti.kingsclock.ui.theme.Red
 import com.lamti.kingsclock.ui.uistate.ChessClock
@@ -302,8 +301,8 @@ private fun ClockScreen(
                     modifier = Modifier,
                     size = 70.dp,
                     imageID = R.drawable.ic_rocket_launch,
-                    color = Blue,
-                    borderColor = Blue
+                    color = MaterialTheme.colors.onSecondary,
+                    borderColor = MaterialTheme.colors.onSecondary
                 )
                 Spacer(modifier = Modifier.size(20.dp))
                 OutlinedButton(
@@ -311,7 +310,9 @@ private fun ClockScreen(
                     text = blacksTimer.formattedTime,
                     width = screenWidth / 1.75f,
                     fontSize = 32.sp,
-                    color = Blue,
+                    color = MaterialTheme.colors.onSecondary,
+                    bgColor = MaterialTheme.colors.onSecondary,
+                    textColor = MaterialTheme.colors.background,
                     onclick = {}
                 )
             }
@@ -325,9 +326,10 @@ private fun ClockScreen(
                 OutlineIcon(
                     modifier = Modifier,
                     size = 70.dp,
-                    imageID = R.drawable.ic_outline_rocket_launch,
-                    color = Green,
-                    borderColor = Green
+                    imageID = R.drawable.ic_rocket_launch,
+                    color = MaterialTheme.colors.background,
+                    borderColor = MaterialTheme.colors.onSecondary,
+                    bgColor = MaterialTheme.colors.onSecondary,
                 )
                 Spacer(modifier = Modifier.size(20.dp))
                 OutlinedButton(
@@ -335,7 +337,7 @@ private fun ClockScreen(
                     text = whitesTimer.formattedTime,
                     width = screenWidth / 1.75f,
                     fontSize = 32.sp,
-                    color = Green,
+                    color = MaterialTheme.colors.onSecondary,
                     onclick = {}
                 )
             }

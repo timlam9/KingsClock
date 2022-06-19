@@ -1,5 +1,6 @@
 package com.lamti.kingsclock.ui.composables.basic
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -9,6 +10,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
@@ -21,6 +23,7 @@ fun OutlineIcon(
     modifier: Modifier = Modifier,
     imageID: Int? = null,
     icon: ImageVector = Icons.Default.Close,
+    bgColor: Color = Color.Transparent,
     size: Dp = 70.dp,
     borderColor: Color = Red,
     color: Color = borderColor,
@@ -30,6 +33,8 @@ fun OutlineIcon(
     IconButton(
         modifier = modifier
             .size(size)
+            .clip(RoundedCornerShape(60))
+            .background(bgColor)
             .border(
                 width = stroke,
                 color = borderColor,
