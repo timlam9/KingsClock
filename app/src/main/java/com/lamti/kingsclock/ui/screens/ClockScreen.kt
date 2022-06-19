@@ -1,5 +1,6 @@
 package com.lamti.kingsclock.ui.screens
 
+import android.os.Build
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
@@ -38,6 +39,7 @@ import com.lamti.kingsclock.ui.composables.basic.RoundedTextButton
 import com.lamti.kingsclock.ui.composables.combound.Clocks
 import com.lamti.kingsclock.ui.composables.combound.FinishButtons
 import com.lamti.kingsclock.ui.composables.combound.PauseButtons
+import com.lamti.kingsclock.ui.drawColoredShadow
 import com.lamti.kingsclock.ui.theme.Blue
 import com.lamti.kingsclock.ui.theme.Green
 import com.lamti.kingsclock.ui.theme.KingsClockTheme
@@ -86,7 +88,7 @@ fun ClockScreen(chessClock: ChessClock, onSettingsClicked: () -> Unit) {
         ),
     )
     val settingsIconTranslationY by animateDpAsState(
-        targetValue = if (showPauseWidgets && !showMenuCloseIcon) screenHeight / 2.35f else screenHeight,
+        targetValue = if (showPauseWidgets && !showMenuCloseIcon) screenHeight / 2.7f else screenHeight,
         animationSpec = tween(
             durationMillis = 100,
             delayMillis = if (showPauseWidgets && !showMenuCloseIcon) 170 else 25,
@@ -94,7 +96,7 @@ fun ClockScreen(chessClock: ChessClock, onSettingsClicked: () -> Unit) {
         ),
     )
     val menuCloseIconTranslationY by animateDpAsState(
-        targetValue = if (showMenuCloseIcon) screenHeight / 2.35f else screenHeight,
+        targetValue = if (showMenuCloseIcon) screenHeight / 2.7f else screenHeight,
         animationSpec = tween(
             durationMillis = 100,
             delayMillis = if (showMenuCloseIcon) 170 else 25,
@@ -272,12 +274,23 @@ private fun ClockScreen(
             blacksTimer = blacksTimer,
             maxTimeMillis = maxTimeMillis
         )
-        RoundedTextButton(
-            modifier = Modifier.scale(scaleStartButton),
-            onClick = onStartButtonClicked,
-            buttonSize = screenWidth / 1.75f,
-            text = playButtonText
-        )
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            RoundedTextButton(
+                modifier = Modifier
+                    .scale(scaleStartButton)
+                    .drawColoredShadow(color = Blue),
+                onClick = onStartButtonClicked,
+                buttonSize = screenWidth / 1.85f,
+                text = playButtonText
+            )
+        } else {
+            RoundedTextButton(
+                modifier = Modifier.scale(scaleStartButton),
+                onClick = onStartButtonClicked,
+                buttonSize = screenWidth / 1.75f,
+                text = playButtonText
+            )
+        }
         Column(modifier = Modifier.offset(y = -screenWidth / 1.4f)) {
             Row(
                 modifier = Modifier
