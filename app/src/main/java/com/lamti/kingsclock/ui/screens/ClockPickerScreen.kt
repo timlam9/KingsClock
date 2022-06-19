@@ -25,13 +25,17 @@ import com.lamti.kingsclock.ui.theme.TextColor
 import com.lamti.kingsclock.ui.uistate.ChessClock
 
 @Composable
-fun ClockPickerScreen(modifier: Modifier = Modifier, onTimeSelected: (ChessClock) -> Unit) {
+fun ClockPickerScreen(
+    modifier: Modifier = Modifier,
+    chessClock: ChessClock,
+    onTimeSelected: (ChessClock) -> Unit,
+) {
     Column(
         modifier = modifier.fillMaxSize(),
         verticalArrangement = Arrangement.SpaceBetween,
         horizontalAlignment = Alignment.Start
     ) {
-        var pickerValue: ChessClock by remember { mutableStateOf(ChessClock(10, 0)) }
+        var pickerValue: ChessClock by remember { mutableStateOf(chessClock) }
 
         Column(
             modifier = Modifier

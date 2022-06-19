@@ -47,7 +47,7 @@ class MainActivity : ComponentActivity() {
                     val screenHeight = configuration.screenHeightDp.dp
 
                     var currentScreen: Screen by remember { mutableStateOf(Screen.ClockScreen) }
-                    var chessClock: ChessClock by remember { mutableStateOf(ChessClock(0, 30)) }
+                    var chessClock: ChessClock by remember { mutableStateOf(ChessClock(10, 0)) }
 
                     val screenTransition by animateDpAsState(
                         targetValue = if (currentScreen == Screen.PickerScreen) 0.dp else screenHeight,
@@ -63,7 +63,8 @@ class MainActivity : ComponentActivity() {
                             currentScreen = Screen.PickerScreen
                         }
                         Screen.PickerScreen -> ClockPickerScreen(
-                            modifier = Modifier.offset(y = screenTransition)
+                            modifier = Modifier.offset(y = screenTransition),
+                            chessClock = chessClock
                         ) {
                             chessClock = it
                             currentScreen = Screen.ClockScreen
