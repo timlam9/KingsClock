@@ -41,6 +41,7 @@ import com.lamti.kingsclock.ui.composables.combound.PauseButtons
 import com.lamti.kingsclock.ui.theme.Blue
 import com.lamti.kingsclock.ui.theme.Green
 import com.lamti.kingsclock.ui.theme.KingsClockTheme
+import com.lamti.kingsclock.ui.theme.Red
 import com.lamti.kingsclock.ui.uistate.ChessClock
 import com.lamti.kingsclock.ui.uistate.ClockState
 import com.lamti.kingsclock.ui.uistate.Timer
@@ -55,16 +56,19 @@ fun ClockScreen(chessClock: ChessClock, onSettingsClicked: () -> Unit) {
     val blacksStartedTranslationValue = -screenHeight
     val whitesStartedTranslationValue = screenHeight
 
-    var clockState by rememberSaveable { mutableStateOf(ClockState.Paused) }
+    var clockState by rememberSaveable { mutableStateOf(ClockState.Idle) }
     var turn by rememberSaveable { mutableStateOf(Turn.Whites) }
 
     var showPauseWidgets by rememberSaveable { mutableStateOf(false) }
+    var showMenuCloseIcon by rememberSaveable { mutableStateOf(false) }
     var showBlacksClock by rememberSaveable { mutableStateOf(false) }
     var showWhitesClock by rememberSaveable { mutableStateOf(false) }
     var showRestartButton by rememberSaveable { mutableStateOf(false) }
     var showCloseButton by rememberSaveable { mutableStateOf(false) }
 
-    val scaleStartButton by animateFloatAsState(if (showPauseWidgets) 1f else 0f)
+    val playButtonScale by animateFloatAsState(if (showPauseWidgets) 1f else 0f)
+    var playButtonText by remember { mutableStateOf("play") }
+
     val blacksTimerTranslationX by animateDpAsState(
         targetValue = if (showPauseWidgets) 0.dp else -screenWidth,
         animationSpec = tween(
@@ -82,16 +86,25 @@ fun ClockScreen(chessClock: ChessClock, onSettingsClicked: () -> Unit) {
         ),
     )
     val settingsIconTranslationY by animateDpAsState(
-        targetValue = if (showPauseWidgets) screenHeight / 2.35f else screenHeight,
+        targetValue = if (showPauseWidgets && !showMenuCloseIcon) screenHeight / 2.35f else screenHeight,
         animationSpec = tween(
             durationMillis = 100,
-            delayMillis = if (showPauseWidgets) 170 else 25,
+            delayMillis = if (showPauseWidgets && !showMenuCloseIcon) 170 else 25,
+            easing = FastOutSlowInEasing
+        ),
+    )
+    val menuCloseIconTranslationY by animateDpAsState(
+        targetValue = if (showMenuCloseIcon) screenHeight / 2.35f else screenHeight,
+        animationSpec = tween(
+            durationMillis = 100,
+            delayMillis = if (showMenuCloseIcon) 170 else 25,
             easing = FastOutSlowInEasing
         ),
     )
 
     val whitesClockTranslationY by animateDpAsState(
         when (clockState) {
+            ClockState.Idle -> whitesStartedTranslationValue
             ClockState.Started -> 0.dp
             ClockState.Paused -> whitesStartedTranslationValue
             ClockState.Finished -> 0.dp
@@ -99,6 +112,7 @@ fun ClockScreen(chessClock: ChessClock, onSettingsClicked: () -> Unit) {
     )
     val blacksClockTranslationY by animateDpAsState(
         when (clockState) {
+            ClockState.Idle -> blacksStartedTranslationValue
             ClockState.Started -> 0.dp
             ClockState.Paused -> blacksStartedTranslationValue
             ClockState.Finished -> 0.dp
@@ -107,19 +121,31 @@ fun ClockScreen(chessClock: ChessClock, onSettingsClicked: () -> Unit) {
 
     LaunchedEffect(clockState) {
         when (clockState) {
+            ClockState.Idle -> {
+                playButtonText = "play"
+                showPauseWidgets = true
+                showBlacksClock = false
+                showWhitesClock = false
+                showRestartButton = false
+                showCloseButton = false
+                showMenuCloseIcon = false
+            }
             ClockState.Started -> {
                 showPauseWidgets = false
                 showBlacksClock = true
                 showWhitesClock = true
                 showRestartButton = false
                 showCloseButton = false
+                showMenuCloseIcon = false
             }
             ClockState.Paused -> {
+                playButtonText = "resume"
                 showPauseWidgets = true
                 showBlacksClock = false
                 showWhitesClock = false
                 showRestartButton = false
                 showCloseButton = false
+                showMenuCloseIcon = true
             }
             ClockState.Finished -> {
                 showPauseWidgets = false
@@ -127,6 +153,7 @@ fun ClockScreen(chessClock: ChessClock, onSettingsClicked: () -> Unit) {
                 showWhitesClock = true
                 showRestartButton = true
                 showCloseButton = true
+                showMenuCloseIcon = false
             }
         }
     }
@@ -135,13 +162,15 @@ fun ClockScreen(chessClock: ChessClock, onSettingsClicked: () -> Unit) {
         clockState = clockState,
         turn = turn,
         maxTimeMillis = (chessClock.minutes * 60 * 1000L) + (chessClock.seconds * 1000L),
+        playButtonText = playButtonText,
         screenWidth = screenWidth,
         blacksClockTranslationY = blacksClockTranslationY,
         whitesClockTranslationY = whitesClockTranslationY,
-        scaleStartButton = scaleStartButton,
+        scaleStartButton = playButtonScale,
         blacksTimerTranslationX = blacksTimerTranslationX,
         whitesTimerTranslationX = whitesTimerTranslationX,
         settingsIconTranslationY = settingsIconTranslationY,
+        menuCloseIconTranslationY = menuCloseIconTranslationY,
         showBlacksClock = showBlacksClock,
         showWhitesClock = showWhitesClock,
         showRestartButton = showRestartButton,
@@ -157,7 +186,7 @@ fun ClockScreen(chessClock: ChessClock, onSettingsClicked: () -> Unit) {
         },
         onCloseButtonClicked = {
             turn = Turn.Whites
-            clockState = ClockState.Paused
+            clockState = ClockState.Idle
         },
         onSettingsClicked = onSettingsClicked
     )
@@ -168,6 +197,7 @@ private fun ClockScreen(
     clockState: ClockState,
     turn: Turn,
     maxTimeMillis: Long,
+    playButtonText: String,
     blacksClockTranslationY: Dp,
     whitesClockTranslationY: Dp,
     screenWidth: Dp,
@@ -175,6 +205,7 @@ private fun ClockScreen(
     blacksTimerTranslationX: Dp,
     whitesTimerTranslationX: Dp,
     settingsIconTranslationY: Dp,
+    menuCloseIconTranslationY: Dp,
     showBlacksClock: Boolean,
     showWhitesClock: Boolean,
     showRestartButton: Boolean,
@@ -219,8 +250,8 @@ private fun ClockScreen(
                     whitesTimer.pause()
                     blacksTimer.pause()
                 }
-                ClockState.Finished -> {
-                }
+                ClockState.Finished -> Unit
+                ClockState.Idle -> Unit
             }
         }
 
@@ -245,7 +276,7 @@ private fun ClockScreen(
             modifier = Modifier.scale(scaleStartButton),
             onClick = onStartButtonClicked,
             buttonSize = screenWidth / 1.75f,
-            text = "Play"
+            text = playButtonText
         )
         Column(modifier = Modifier.offset(y = -screenWidth / 1.4f)) {
             Row(
@@ -325,6 +356,17 @@ private fun ClockScreen(
             imageID = R.drawable.ic_settings,
             borderColor = MaterialTheme.colors.onSecondary,
             onClick = onSettingsClicked
+        )
+        OutlineIcon(
+            modifier = Modifier.offset(y = menuCloseIconTranslationY),
+            size = 70.dp,
+            imageID = R.drawable.ic_close,
+            borderColor = Red,
+            onClick = {
+                blacksTimer.reset()
+                whitesTimer.reset()
+                onCloseButtonClicked()
+            }
         )
     }
 }

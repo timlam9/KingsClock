@@ -59,11 +59,11 @@ fun RoundedTextButton(
         Text(
             modifier = Modifier.alpha(animatedAlpha),
             text = text,
-            style = MaterialTheme.typography.h2.copy(
+            style = MaterialTheme.typography.h3.copy(
                 color = MaterialTheme.colors.background,
                 fontWeight = FontWeight.ExtraBold,
                 fontFamily = FontFamily.Monospace,
-                letterSpacing = 6.sp,
+                letterSpacing = 4.sp,
                 textAlign = TextAlign.Center,
             )
         )
