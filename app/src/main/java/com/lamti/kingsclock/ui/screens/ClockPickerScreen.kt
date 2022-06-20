@@ -19,7 +19,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -43,13 +42,12 @@ fun ClockPickerScreen(
     onTimeSelected: (ChessClock) -> Unit,
 ) {
     val screenWidth: Dp = LocalConfiguration.current.screenWidthDp.dp
-    var chessMode by rememberSaveable { mutableStateOf(ChessMode.Bullet) }
-    var pickerValue: ChessClock by remember { mutableStateOf(chessMode.chessClock) }
+    var chessMode: ChessMode by remember { mutableStateOf(ChessMode.Bullet) }
+    var pickerValue: ChessClock by remember { mutableStateOf(chessMode.clock) }
     val transition = updateTransition(targetState = chessMode, label = "animation")
+    var customClockClicked by remember { mutableStateOf(false) }
 
-    LaunchedEffect(chessMode) {
-        pickerValue = chessMode.chessClock
-    }
+    LaunchedEffect(chessMode) { if (customClockClicked) pickerValue = chessMode.clock }
 
     val bulletIconColor by transition.animateColor(label = "color") { mode ->
         when (mode) {
@@ -144,7 +142,10 @@ fun ClockPickerScreen(
                     size = 70.dp,
                     padding = 20.dp,
                     borderColor = customIconColor,
-                    onClick = { chessMode = ChessMode.Custom }
+                    onClick = {
+                        customClockClicked = true
+                        chessMode = ChessMode.Custom
+                    }
                 )
                 OutlineIcon(
                     imageID = R.drawable.ic_arrow_up,
@@ -165,8 +166,9 @@ fun ClockPickerScreen(
         ChessClockPicker(
             value = pickerValue,
             onValueChange = {
-                chessMode = ChessMode.Custom
+                customClockClicked = false
                 pickerValue = it
+                chessMode = ChessMode.Custom
             }
         )
         BasicButton(

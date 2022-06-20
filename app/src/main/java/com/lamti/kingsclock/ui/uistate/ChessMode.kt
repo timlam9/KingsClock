@@ -1,10 +1,15 @@
 package com.lamti.kingsclock.ui.uistate
 
-enum class ChessMode(val chessClock: ChessClock) {
+private val BulletClock = ChessClock(1, 0)
+private val BlitzClock = ChessClock(3, 0)
+private val RapidClock = ChessClock(10, 0)
+private val ClassicalClock = ChessClock(15, 0)
+private val CustomClock = ChessClock(5, 0)
 
-    Bullet(ChessClock(1, 0)),
-    Blitz(ChessClock(3, 0)),
-    Rapid(ChessClock(10, 0)),
-    Classical(ChessClock(15, 0)),
-    Custom(ChessClock(5, 0)),
+enum class ChessMode(val clock: ChessClock) {
+    Bullet(BulletClock),
+    Blitz(BlitzClock),
+    Rapid(RapidClock),
+    Classical(ClassicalClock),
+    Custom(CustomClock)
 }
