@@ -8,12 +8,9 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -30,14 +27,13 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.lamti.kingsclock.R
 import com.lamti.kingsclock.ui.composables.basic.AnimatedCircle
 import com.lamti.kingsclock.ui.composables.basic.OutlineIcon
-import com.lamti.kingsclock.ui.composables.basic.OutlinedButton
 import com.lamti.kingsclock.ui.composables.basic.RoundedTextButton
 import com.lamti.kingsclock.ui.composables.combound.Clocks
 import com.lamti.kingsclock.ui.composables.combound.FinishButtons
+import com.lamti.kingsclock.ui.composables.combound.IconTextRow
 import com.lamti.kingsclock.ui.composables.combound.PauseButtons
 import com.lamti.kingsclock.ui.drawColoredShadow
 import com.lamti.kingsclock.ui.theme.Blue
@@ -291,56 +287,25 @@ private fun ClockScreen(
             )
         }
         Column(modifier = Modifier.offset(y = -screenWidth / 1.4f)) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .offset(x = blacksTimerTranslationX)
-                    .padding(horizontal = 20.dp)
-            ) {
-                OutlineIcon(
-                    modifier = Modifier,
-                    size = 70.dp,
-                    imageID = R.drawable.ic_rocket_launch,
-                    color = MaterialTheme.colors.onSecondary,
-                    borderColor = MaterialTheme.colors.onSecondary
-                )
-                Spacer(modifier = Modifier.size(20.dp))
-                OutlinedButton(
-                    modifier = Modifier.weight(1f),
-                    text = blacksTimer.formattedTime,
-                    width = screenWidth / 1.75f,
-                    fontSize = 32.sp,
-                    color = MaterialTheme.colors.onSecondary,
-                    bgColor = MaterialTheme.colors.onSecondary,
-                    textColor = MaterialTheme.colors.background,
-                    onclick = {}
-                )
-            }
+            IconTextRow(
+                offset = blacksTimerTranslationX,
+                text = blacksTimer.formattedTime,
+                color = MaterialTheme.colors.onSecondary,
+                textBackgroundColor = MaterialTheme.colors.onSecondary,
+                borderColor = MaterialTheme.colors.onSecondary,
+                iconBackgroundColor = MaterialTheme.colors.background,
+                textColor = MaterialTheme.colors.background,
+            )
             Spacer(modifier = Modifier.size(20.dp))
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .offset(x = whitesTimerTranslationX)
-                    .padding(horizontal = 20.dp)
-            ) {
-                OutlineIcon(
-                    modifier = Modifier,
-                    size = 70.dp,
-                    imageID = R.drawable.ic_rocket_launch,
-                    color = MaterialTheme.colors.background,
-                    borderColor = MaterialTheme.colors.onSecondary,
-                    bgColor = MaterialTheme.colors.onSecondary,
-                )
-                Spacer(modifier = Modifier.size(20.dp))
-                OutlinedButton(
-                    modifier = Modifier.weight(1f),
-                    text = whitesTimer.formattedTime,
-                    width = screenWidth / 1.75f,
-                    fontSize = 32.sp,
-                    color = MaterialTheme.colors.onSecondary,
-                    onclick = {}
-                )
-            }
+            IconTextRow(
+                offset = whitesTimerTranslationX,
+                text = whitesTimer.formattedTime,
+                color = MaterialTheme.colors.background,
+                textBackgroundColor = MaterialTheme.colors.background,
+                borderColor = MaterialTheme.colors.onSecondary,
+                iconBackgroundColor = MaterialTheme.colors.onSecondary,
+                textColor = MaterialTheme.colors.onSecondary,
+            )
         }
         AnimatedVisibility(clockState != ClockState.Finished) {
             PauseButtons(
@@ -367,22 +332,21 @@ private fun ClockScreen(
         )
         OutlineIcon(
             modifier = Modifier.offset(y = settingsIconTranslationY),
-            size = 70.dp,
             imageID = R.drawable.ic_settings,
+            size = 70.dp,
             borderColor = MaterialTheme.colors.onSecondary,
             onClick = onSettingsClicked
         )
         OutlineIcon(
             modifier = Modifier.offset(y = menuCloseIconTranslationY),
-            size = 70.dp,
             imageID = R.drawable.ic_close,
-            borderColor = Red,
-            onClick = {
-                blacksTimer.reset()
-                whitesTimer.reset()
-                onCloseButtonClicked()
-            }
-        )
+            size = 70.dp,
+            borderColor = Red
+        ) {
+            blacksTimer.reset()
+            whitesTimer.reset()
+            onCloseButtonClicked()
+        }
     }
 }
 

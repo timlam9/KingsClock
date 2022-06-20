@@ -23,10 +23,10 @@ fun OutlineIcon(
     modifier: Modifier = Modifier,
     imageID: Int? = null,
     icon: ImageVector = Icons.Default.Close,
-    bgColor: Color = Color.Transparent,
     size: Dp = 70.dp,
     borderColor: Color = Red,
     color: Color = borderColor,
+    backgroundColor: Color = Color.Transparent,
     stroke: Dp = 6.dp,
     onClick: () -> Unit = {}
 ) {
@@ -34,7 +34,7 @@ fun OutlineIcon(
         modifier = modifier
             .size(size)
             .clip(RoundedCornerShape(60))
-            .background(bgColor)
+            .background(backgroundColor)
             .border(
                 width = stroke,
                 color = borderColor,
