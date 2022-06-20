@@ -18,27 +18,35 @@ import com.lamti.kingsclock.ui.composables.basic.OutlinedButton
 
 @Composable
 fun IconTextRow(
-    offset: Dp,
+    modifier: Modifier = Modifier,
+    padding: Dp = 20.dp,
+    offset: Dp = 0.dp,
     text: String,
+    icon: Int = R.drawable.ic_pawns,
+    iconPadding: Dp = 18.dp,
     color: Color,
-    textBackgroundColor: Color,
+    textBackgroundColor: Color = Color.Transparent,
     borderColor: Color,
+    iconBorderColor: Color = borderColor,
     textColor: Color = borderColor,
     iconBackgroundColor: Color = Color.Transparent,
+    onIconClicked: () -> Unit = {}
 ) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .offset(x = offset)
-            .padding(horizontal = 20.dp)
+            .padding(horizontal = padding)
     ) {
         OutlineIcon(
             modifier = Modifier,
-            imageID = R.drawable.ic_rocket_launch,
+            imageID = icon,
             size = 70.dp,
             color = color,
-            borderColor = borderColor,
-            backgroundColor = iconBackgroundColor
+            padding = iconPadding,
+            borderColor = iconBorderColor,
+            backgroundColor = iconBackgroundColor,
+            onClick = onIconClicked
         )
         Spacer(modifier = Modifier.size(20.dp))
         OutlinedButton(

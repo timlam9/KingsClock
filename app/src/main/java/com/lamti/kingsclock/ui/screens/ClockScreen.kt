@@ -275,7 +275,7 @@ private fun ClockScreen(
                     .scale(scaleStartButton)
                     .drawColoredShadow(color = Blue),
                 onClick = onStartButtonClicked,
-                buttonSize = screenWidth / 1.85f,
+                buttonSize = screenWidth / 1.75f,
                 text = playButtonText
             )
         } else {
@@ -354,7 +354,7 @@ private fun ClockScreen(
 @Composable
 fun DefaultPreview() {
     KingsClockTheme {
-        ClockScreen(ChessClock(10, 0)) {
+        ClockScreen(ChessClock(1, 0)) {
 
         }
     }

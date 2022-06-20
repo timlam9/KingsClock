@@ -43,7 +43,7 @@ fun OutlinedButton(
             style = MaterialTheme.typography.button.copy(
                 color = textColor,
                 fontWeight = FontWeight.ExtraBold,
-                fontSize = fontSize
+                fontSize = fontSize,
             )
         )
     }

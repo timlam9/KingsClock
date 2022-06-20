@@ -14,7 +14,7 @@ private val DarkColorPalette = darkColors(
     background = Color.Black,
     onPrimary = DarkGreen,
     onSurface = LightGray,
-    onSecondary = TextColor
+    onSecondary = Color.White
 )
 
 private val LightColorPalette = lightColors(
@@ -27,12 +27,8 @@ private val LightColorPalette = lightColors(
     onSecondary = TextColorDark
 
     /* Other default colors to override
-    background = Color.White,
     surface = Color.White,
-    onPrimary = Color.White,
-    onSecondary = Color.Black,
     onBackground = Color.Black,
-    onSurface = Color.Black,
     */
 )
 
