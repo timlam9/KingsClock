@@ -45,9 +45,8 @@ fun ClockPickerScreen(
     var chessMode: ChessMode by remember { mutableStateOf(ChessMode.Bullet) }
     var pickerValue: ChessClock by remember { mutableStateOf(chessMode.clock) }
     val transition = updateTransition(targetState = chessMode, label = "animation")
-    var customClockClicked by remember { mutableStateOf(false) }
 
-    LaunchedEffect(chessMode) { if (customClockClicked) pickerValue = chessMode.clock }
+    LaunchedEffect(chessMode) { if (chessMode != ChessMode.Custom) pickerValue = chessMode.clock }
 
     val bulletIconColor by transition.animateColor(label = "color") { mode ->
         when (mode) {
@@ -142,10 +141,7 @@ fun ClockPickerScreen(
                     size = 70.dp,
                     padding = 20.dp,
                     borderColor = customIconColor,
-                    onClick = {
-                        customClockClicked = true
-                        chessMode = ChessMode.Custom
-                    }
+                    onClick = { chessMode = ChessMode.Custom }
                 )
                 OutlineIcon(
                     imageID = R.drawable.ic_arrow_up,
@@ -166,7 +162,6 @@ fun ClockPickerScreen(
         ChessClockPicker(
             value = pickerValue,
             onValueChange = {
-                customClockClicked = false
                 pickerValue = it
                 chessMode = ChessMode.Custom
             }
