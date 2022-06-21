@@ -1,5 +1,8 @@
 package com.lamti.kingsclock.ui.screens
 
+import android.content.Context
+import android.media.MediaPlayer
+import android.util.Log
 import androidx.compose.animation.animateColor
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.layout.Arrangement
@@ -23,6 +26,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -41,12 +45,17 @@ fun ClockPickerScreen(
     modifier: Modifier = Modifier,
     onTimeSelected: (ChessClock) -> Unit,
 ) {
+    val context = LocalContext.current
     val screenWidth: Dp = LocalConfiguration.current.screenWidthDp.dp
     var chessMode: ChessMode by remember { mutableStateOf(ChessMode.Bullet) }
     var pickerValue: ChessClock by remember { mutableStateOf(chessMode.clock) }
     val transition = updateTransition(targetState = chessMode, label = "animation")
 
     LaunchedEffect(chessMode) { if (chessMode != ChessMode.Custom) pickerValue = chessMode.clock }
+
+    LaunchedEffect(true) {
+        context.playSound()
+    }
 
     val bulletIconColor by transition.animateColor(label = "color") { mode ->
         when (mode) {
@@ -110,28 +119,40 @@ fun ClockPickerScreen(
                     size = 70.dp,
                     padding = 20.dp,
                     borderColor = bulletIconColor,
-                    onClick = { chessMode = ChessMode.Bullet }
+                    onClick = {
+                        context.playSound()
+                        chessMode = ChessMode.Bullet
+                    }
                 )
                 OutlineIcon(
                     imageID = R.drawable.ic_blitz,
                     size = 70.dp,
                     padding = 20.dp,
                     borderColor = blitzIconColor,
-                    onClick = { chessMode = ChessMode.Blitz }
+                    onClick = {
+                        context.playSound()
+                        chessMode = ChessMode.Blitz
+                    }
                 )
                 OutlineIcon(
                     imageID = R.drawable.ic_rapid,
                     size = 70.dp,
                     padding = 20.dp,
                     borderColor = rapidIconColor,
-                    onClick = { chessMode = ChessMode.Rapid }
+                    onClick = {
+                        context.playSound()
+                        chessMode = ChessMode.Rapid
+                    }
                 )
                 OutlineIcon(
                     imageID = R.drawable.ic_classical,
                     size = 70.dp,
                     padding = 20.dp,
                     borderColor = classicalIconColor,
-                    onClick = { chessMode = ChessMode.Classical }
+                    onClick = {
+                        context.playSound()
+                        chessMode = ChessMode.Classical
+                    }
                 )
             }
             Spacer(modifier = Modifier.size(20.dp))
@@ -141,7 +162,10 @@ fun ClockPickerScreen(
                     size = 70.dp,
                     padding = 20.dp,
                     borderColor = customIconColor,
-                    onClick = { chessMode = ChessMode.Custom }
+                    onClick = {
+                        context.playSound()
+                        chessMode = ChessMode.Custom
+                    }
                 )
                 OutlineIcon(
                     imageID = R.drawable.ic_arrow_up,
@@ -180,5 +204,13 @@ fun ClockPickerScreen(
         ) {
             onTimeSelected(pickerValue)
         }
+    }
+}
+
+fun Context.playSound(sound: Int = R.raw.click) {
+    try {
+        MediaPlayer.create(this, sound).start()
+    } catch (e: Exception) {
+        Log.e("TAGARA", "Ex: ${e.message}")
     }
 }

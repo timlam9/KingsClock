@@ -1,6 +1,8 @@
 package com.lamti.kingsclock.ui.screens
 
+import android.media.MediaPlayer
 import android.os.Build
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
@@ -24,6 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -216,42 +219,55 @@ private fun ClockScreen(
     onCloseButtonClicked: () -> Unit,
     onSettingsClicked: () -> Unit,
 ) {
+    val context = LocalContext.current
+    var sound by remember { mutableStateOf(R.raw.intro) }
+
+    LaunchedEffect(sound) {
+        try {
+            MediaPlayer.create(context, sound).start()
+        } catch (e: Exception) {
+            Log.e("TAGARA", "Ex: ${e.message}")
+        }
+    }
+
+    val whitesTimer = remember { Timer(maxTimeMillis) }
+    val blacksTimer = remember { Timer(maxTimeMillis) }
+
+    LaunchedEffect(blacksTimer.isTimerFinished) {
+        if (blacksTimer.isTimerFinished) onBlacksTimerFinished()
+    }
+    LaunchedEffect(whitesTimer.isTimerFinished) {
+        if (whitesTimer.isTimerFinished) onWhitesTimerFinished()
+    }
+    LaunchedEffect(clockState, turn) {
+        when (clockState) {
+            ClockState.Started -> {
+                when (turn) {
+                    Turn.Blacks -> {
+                        whitesTimer.pause()
+                        blacksTimer.start()
+                    }
+                    Turn.Whites -> {
+                        whitesTimer.start()
+                        blacksTimer.pause()
+                    }
+                }
+            }
+            ClockState.Paused -> {
+                whitesTimer.pause()
+                blacksTimer.pause()
+            }
+            ClockState.Finished -> {
+                sound = R.raw.game_over
+            }
+            ClockState.Idle -> Unit
+        }
+    }
+
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        val whitesTimer = remember { Timer(maxTimeMillis) }
-        val blacksTimer = remember { Timer(maxTimeMillis) }
-
-        LaunchedEffect(blacksTimer.isTimerFinished) {
-            if (blacksTimer.isTimerFinished) onBlacksTimerFinished()
-        }
-        LaunchedEffect(whitesTimer.isTimerFinished) {
-            if (whitesTimer.isTimerFinished) onWhitesTimerFinished()
-        }
-        LaunchedEffect(clockState, turn) {
-            when (clockState) {
-                ClockState.Started -> {
-                    when (turn) {
-                        Turn.Blacks -> {
-                            whitesTimer.pause()
-                            blacksTimer.start()
-                        }
-                        Turn.Whites -> {
-                            whitesTimer.start()
-                            blacksTimer.pause()
-                        }
-                    }
-                }
-                ClockState.Paused -> {
-                    whitesTimer.pause()
-                    blacksTimer.pause()
-                }
-                ClockState.Finished -> Unit
-                ClockState.Idle -> Unit
-            }
-        }
-
         if (clockState == ClockState.Started) {
             AnimatedCircle(
                 turn = turn,
@@ -260,7 +276,10 @@ private fun ClockScreen(
         }
         Clocks(
             clockState = clockState,
-            onBackgroundClicked = onBackgroundClicked,
+            onBackgroundClicked = {
+                onBackgroundClicked()
+                sound = if (sound == R.raw.blacks) R.raw.whites else R.raw.blacks
+            },
             blacksClockTranslationY = blacksClockTranslationY,
             screenWidth = screenWidth,
             turn = turn,
@@ -274,14 +293,20 @@ private fun ClockScreen(
                 modifier = Modifier
                     .scale(scaleStartButton)
                     .drawColoredShadow(color = Blue),
-                onClick = onStartButtonClicked,
+                onClick = {
+                    sound = R.raw.start
+                    onStartButtonClicked()
+                },
                 buttonSize = screenWidth / 1.75f,
                 text = playButtonText
             )
         } else {
             RoundedTextButton(
                 modifier = Modifier.scale(scaleStartButton),
-                onClick = onStartButtonClicked,
+                onClick = {
+                    sound = R.raw.start
+                    onStartButtonClicked()
+                },
                 buttonSize = screenWidth / 1.75f,
                 text = playButtonText
             )
@@ -312,7 +337,10 @@ private fun ClockScreen(
                 showBlacksClock = showBlacksClock,
                 enabledClockState = turn,
                 screenWidth = screenWidth,
-                onPauseButtonClicked = onPauseButtonClicked,
+                onPauseButtonClicked = {
+                    sound = R.raw.pause
+                    onPauseButtonClicked()
+                },
                 showWhitesClock = showWhitesClock
             )
         }
@@ -320,11 +348,13 @@ private fun ClockScreen(
             showRestartButton = showRestartButton,
             showCloseButton = showCloseButton,
             onRestartButtonClicked = {
+                sound = R.raw.start
                 blacksTimer.reset()
                 whitesTimer.reset()
                 onRestartButtonClicked()
             },
             onCloseButtonClicked = {
+                sound = R.raw.exit
                 blacksTimer.reset()
                 whitesTimer.reset()
                 onCloseButtonClicked()
@@ -335,7 +365,10 @@ private fun ClockScreen(
             imageID = R.drawable.ic_settings,
             size = 70.dp,
             borderColor = MaterialTheme.colors.onSecondary,
-            onClick = onSettingsClicked
+            onClick = {
+                sound = R.raw.click
+                onSettingsClicked()
+            }
         )
         OutlineIcon(
             modifier = Modifier.offset(y = menuCloseIconTranslationY),
@@ -343,6 +376,7 @@ private fun ClockScreen(
             size = 70.dp,
             borderColor = Red
         ) {
+            sound = R.raw.exit
             blacksTimer.reset()
             whitesTimer.reset()
             onCloseButtonClicked()
