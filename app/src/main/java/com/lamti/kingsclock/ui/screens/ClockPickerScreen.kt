@@ -4,6 +4,10 @@ import android.content.Context
 import android.media.MediaPlayer
 import android.util.Log
 import androidx.compose.animation.animateColor
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.repeatable
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -25,7 +29,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
@@ -34,8 +37,8 @@ import androidx.compose.ui.unit.sp
 import com.lamti.kingsclock.R
 import com.lamti.kingsclock.ui.composables.basic.BasicButton
 import com.lamti.kingsclock.ui.composables.basic.OutlineIcon
-import com.lamti.kingsclock.ui.composables.basic.OutlinedButton
 import com.lamti.kingsclock.ui.composables.picker.ChessClockPicker
+import com.lamti.kingsclock.ui.theme.Blue
 import com.lamti.kingsclock.ui.theme.TextColor
 import com.lamti.kingsclock.ui.uistate.ChessClock
 import com.lamti.kingsclock.ui.uistate.ChessMode
@@ -43,13 +46,60 @@ import com.lamti.kingsclock.ui.uistate.ChessMode
 @Composable
 fun ClockPickerScreen(
     modifier: Modifier = Modifier,
+    iconSize: Dp = 58.dp,
+    iconPadding: Dp = 14.dp,
+    miniSpace: Dp = 10.dp,
+    space: Dp = 20.dp,
     onTimeSelected: (ChessClock) -> Unit,
 ) {
     val context = LocalContext.current
-    val screenWidth: Dp = LocalConfiguration.current.screenWidthDp.dp
-    var chessMode: ChessMode by remember { mutableStateOf(ChessMode.Bullet) }
+    var increment: Int by remember { mutableStateOf(0) }
+    var chessMode: ChessMode by remember { mutableStateOf(ChessMode.Custom) }
     var pickerValue: ChessClock by remember { mutableStateOf(chessMode.clock) }
     val transition = updateTransition(targetState = chessMode, label = "animation")
+
+    var animateModeColor by remember { mutableStateOf(false) }
+    val animatedColor by animateColorAsState(
+        targetValue = if (animateModeColor) MaterialTheme.colors.onBackground else Blue,
+        animationSpec = repeatable(
+            iterations = 1,
+            animation = tween(
+                durationMillis = 150,
+            ),
+            repeatMode = RepeatMode.Restart,
+        ),
+        finishedListener = {
+            animateModeColor = false
+        }
+    )
+    val animatedTimeColor by animateColorAsState(
+        targetValue = if (animateModeColor) Blue else MaterialTheme.colors.onBackground,
+        animationSpec = repeatable(
+            iterations = 1,
+            animation = tween(
+                durationMillis = 150,
+            ),
+            repeatMode = RepeatMode.Restart,
+        ),
+        finishedListener = {
+            animateModeColor = false
+        }
+    )
+
+    var animateIncrementColor by remember { mutableStateOf(false) }
+    val animatedIncrementColor by animateColorAsState(
+        targetValue = if (animateIncrementColor) MaterialTheme.colors.onBackground else Blue,
+        animationSpec = repeatable(
+            iterations = 1,
+            animation = tween(
+                durationMillis = 150,
+            ),
+            repeatMode = RepeatMode.Restart,
+        ),
+        finishedListener = {
+            animateIncrementColor = false
+        }
+    )
 
     LaunchedEffect(chessMode) { if (chessMode != ChessMode.Custom) pickerValue = chessMode.clock }
 
@@ -93,11 +143,10 @@ fun ClockPickerScreen(
         verticalArrangement = Arrangement.SpaceBetween,
         horizontalAlignment = Alignment.Start
     ) {
-
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(20.dp)
+                .padding(space)
         ) {
             Text(
                 text = "King's Clock",
@@ -109,83 +158,137 @@ fun ClockPickerScreen(
                 text = "How many minutes (and seconds) do you want to play with?",
                 style = MaterialTheme.typography.body1.copy(color = TextColor)
             )
-            Spacer(modifier = Modifier.size(32.dp))
+            Spacer(modifier = Modifier.size(space))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Start,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Mode: ",
+                    style = MaterialTheme.typography.h4.copy(
+                        color = MaterialTheme.colors.onSecondary,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                )
+                Text(
+                    text = chessMode.name,
+                    style = MaterialTheme.typography.h4.copy(
+                        color = animatedColor,
+                        fontWeight = FontWeight.Normal
+                    )
+                )
+            }
+            Spacer(modifier = Modifier.size(miniSpace))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 OutlineIcon(
+                    imageID = R.drawable.ic_custom,
+                    size = iconSize,
+                    padding = iconPadding,
+                    borderColor = customIconColor,
+                    onClick = {
+                        animateModeColor = true
+                        context.playSound()
+                        chessMode = ChessMode.Custom
+                    }
+                )
+                OutlineIcon(
                     imageID = R.drawable.ic_bullet,
-                    size = 70.dp,
-                    padding = 20.dp,
+                    size = iconSize,
+                    padding = iconPadding,
                     borderColor = bulletIconColor,
                     onClick = {
+                        animateModeColor = true
                         context.playSound()
                         chessMode = ChessMode.Bullet
                     }
                 )
                 OutlineIcon(
                     imageID = R.drawable.ic_blitz,
-                    size = 70.dp,
-                    padding = 20.dp,
+                    size = iconSize,
+                    padding = iconPadding,
                     borderColor = blitzIconColor,
                     onClick = {
+                        animateModeColor = true
                         context.playSound()
                         chessMode = ChessMode.Blitz
                     }
                 )
                 OutlineIcon(
                     imageID = R.drawable.ic_rapid,
-                    size = 70.dp,
-                    padding = 20.dp,
+                    size = iconSize,
+                    padding = iconPadding,
                     borderColor = rapidIconColor,
                     onClick = {
+                        animateModeColor = true
                         context.playSound()
                         chessMode = ChessMode.Rapid
                     }
                 )
                 OutlineIcon(
                     imageID = R.drawable.ic_classical,
-                    size = 70.dp,
-                    padding = 20.dp,
+                    size = iconSize,
+                    padding = iconPadding,
                     borderColor = classicalIconColor,
                     onClick = {
+                        animateModeColor = true
                         context.playSound()
                         chessMode = ChessMode.Classical
                     }
                 )
             }
-            Spacer(modifier = Modifier.size(20.dp))
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                OutlineIcon(
-                    imageID = R.drawable.ic_custom,
-                    size = 70.dp,
-                    padding = 20.dp,
-                    borderColor = customIconColor,
-                    onClick = {
-                        context.playSound()
-                        chessMode = ChessMode.Custom
-                    }
+            Spacer(modifier = Modifier.size(space))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Start,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Increment: ",
+                    style = MaterialTheme.typography.h4.copy(
+                        color = MaterialTheme.colors.onSecondary,
+                        fontWeight = FontWeight.SemiBold
+                    )
                 )
+                Text(
+                    text = "$increment\"",
+                    style = MaterialTheme.typography.h4.copy(
+                        color = animatedIncrementColor,
+                        fontWeight = FontWeight.Normal
+                    )
+                )
+            }
+            Spacer(modifier = Modifier.size(miniSpace))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
                 OutlineIcon(
                     imageID = R.drawable.ic_arrow_up,
-                    size = 70.dp,
-                    padding = 20.dp,
+                    size = iconSize,
+                    padding = iconPadding,
                     borderColor = MaterialTheme.colors.onSecondary,
-                    onClick = { }
-                )
-                OutlinedButton(
-                    width = screenWidth / 2f - 20.dp,
-                    text = chessMode.name,
-                    fontSize = 32.sp,
-                    borderColor = MaterialTheme.colors.onSecondary,
-                    onclick = {}
+                    onClick = {
+                        context.playSound()
+                        animateIncrementColor = true
+                        increment = when (increment) {
+                            0 -> 15
+                            15 -> 30
+                            30 -> 60
+                            else -> 0
+                        }
+                    }
                 )
             }
         }
         ChessClockPicker(
             value = pickerValue,
+            textColor = animatedTimeColor,
             onValueChange = {
+                context.playSound()
                 pickerValue = it
                 chessMode = ChessMode.Custom
             }
@@ -193,7 +296,7 @@ fun ClockPickerScreen(
         BasicButton(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(100.dp),
+                .height(85.dp),
             text = "Select",
             style = MaterialTheme.typography.button.copy(
                 color = MaterialTheme.colors.background,

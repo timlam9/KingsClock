@@ -27,7 +27,8 @@ fun ChessClockPicker(
     secondsRange: Iterable<Int> = 0..59,
     onValueChange: (ChessClock) -> Unit,
     dividersColor: Color = MaterialTheme.colors.primary,
-    textStyle: TextStyle = LocalTextStyle.current,
+    textColor: Color = MaterialTheme.colors.onSecondary,
+    textStyle: TextStyle = LocalTextStyle.current.copy(color = textColor),
 ) {
     Row(
         modifier = modifier.padding(20.dp),

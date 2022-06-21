@@ -24,7 +24,7 @@ fun OutlineIcon(
     borderColor: Color = Red,
     color: Color = borderColor,
     backgroundColor: Color = Color.Transparent,
-    stroke: Dp = 6.dp,
+    stroke: Dp = 4.dp,
     padding: Dp = 0.dp,
     onClick: () -> Unit = {}
 ) {
