@@ -47,6 +47,9 @@ import com.lamti.kingsclock.ui.uistate.ClockState
 import com.lamti.kingsclock.ui.uistate.Timer
 import com.lamti.kingsclock.ui.uistate.Turn
 
+private const val START = "start"
+private const val RESUME = "resume"
+
 @Composable
 fun ClockScreen(chessClock: ChessClock, onSettingsClicked: () -> Unit) {
     val configuration = LocalConfiguration.current
@@ -67,7 +70,7 @@ fun ClockScreen(chessClock: ChessClock, onSettingsClicked: () -> Unit) {
     var showCloseButton by rememberSaveable { mutableStateOf(false) }
 
     val playButtonScale by animateFloatAsState(if (showPauseWidgets) 1f else 0f)
-    var playButtonText by remember { mutableStateOf("play") }
+    var playButtonText by remember { mutableStateOf(START) }
 
     val blacksTimerTranslationX by animateDpAsState(
         targetValue = if (showPauseWidgets) 0.dp else -screenWidth,
@@ -122,7 +125,7 @@ fun ClockScreen(chessClock: ChessClock, onSettingsClicked: () -> Unit) {
     LaunchedEffect(clockState) {
         when (clockState) {
             ClockState.Idle -> {
-                playButtonText = "play"
+                playButtonText = START
                 showPauseWidgets = true
                 showBlacksClock = false
                 showWhitesClock = false
@@ -139,7 +142,7 @@ fun ClockScreen(chessClock: ChessClock, onSettingsClicked: () -> Unit) {
                 showMenuCloseIcon = false
             }
             ClockState.Paused -> {
-                playButtonText = "resume"
+                playButtonText = RESUME
                 showPauseWidgets = true
                 showBlacksClock = false
                 showWhitesClock = false
