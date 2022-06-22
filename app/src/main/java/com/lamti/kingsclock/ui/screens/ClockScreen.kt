@@ -8,13 +8,19 @@ import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -24,12 +30,18 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.lamti.kingsclock.R
 import com.lamti.kingsclock.ui.composables.basic.AnimatedCircle
 import com.lamti.kingsclock.ui.composables.basic.OutlineIcon
@@ -68,6 +80,10 @@ fun ClockScreen(chessClock: ChessClock, onSettingsClicked: () -> Unit) {
     var showWhitesClock by rememberSaveable { mutableStateOf(false) }
     var showRestartButton by rememberSaveable { mutableStateOf(false) }
     var showCloseButton by rememberSaveable { mutableStateOf(false) }
+
+    var showTouchIndicator by rememberSaveable { mutableStateOf(false) }
+    var rotateTouchIndicator by rememberSaveable { mutableStateOf(false) }
+    val touchIndicatorRotateValue by animateFloatAsState(if (rotateTouchIndicator) 180f else 0f)
 
     val playButtonScale by animateFloatAsState(if (showPauseWidgets) 1f else 0f)
     var playButtonText by remember { mutableStateOf(START) }
@@ -132,6 +148,8 @@ fun ClockScreen(chessClock: ChessClock, onSettingsClicked: () -> Unit) {
                 showRestartButton = false
                 showCloseButton = false
                 showMenuCloseIcon = false
+                showTouchIndicator = false
+                rotateTouchIndicator = false
             }
             ClockState.Started -> {
                 showPauseWidgets = false
@@ -140,6 +158,7 @@ fun ClockScreen(chessClock: ChessClock, onSettingsClicked: () -> Unit) {
                 showRestartButton = false
                 showCloseButton = false
                 showMenuCloseIcon = false
+                if (!rotateTouchIndicator) showTouchIndicator = true
             }
             ClockState.Paused -> {
                 playButtonText = RESUME
@@ -149,6 +168,7 @@ fun ClockScreen(chessClock: ChessClock, onSettingsClicked: () -> Unit) {
                 showRestartButton = false
                 showCloseButton = false
                 showMenuCloseIcon = true
+                showTouchIndicator = false
             }
             ClockState.Finished -> {
                 showPauseWidgets = false
@@ -157,6 +177,7 @@ fun ClockScreen(chessClock: ChessClock, onSettingsClicked: () -> Unit) {
                 showRestartButton = true
                 showCloseButton = true
                 showMenuCloseIcon = false
+                showTouchIndicator = false
             }
         }
     }
@@ -178,7 +199,13 @@ fun ClockScreen(chessClock: ChessClock, onSettingsClicked: () -> Unit) {
         showWhitesClock = showWhitesClock,
         showRestartButton = showRestartButton,
         showCloseButton = showCloseButton,
-        onBackgroundClicked = { turn = turn.changeClock() },
+        showTutorial = showTouchIndicator,
+        touchIndicatorRotateValue = touchIndicatorRotateValue,
+        onBackgroundClicked = {
+            if (rotateTouchIndicator) showTouchIndicator = false
+            rotateTouchIndicator = true
+            turn = turn.changeClock()
+        },
         onStartButtonClicked = { clockState = ClockState.Started },
         onPauseButtonClicked = { clockState = ClockState.Paused },
         onBlacksTimerFinished = { clockState = ClockState.Finished },
@@ -213,6 +240,8 @@ private fun ClockScreen(
     showWhitesClock: Boolean,
     showRestartButton: Boolean,
     showCloseButton: Boolean,
+    showTutorial: Boolean,
+    touchIndicatorRotateValue: Float,
     onBackgroundClicked: () -> Unit,
     onStartButtonClicked: () -> Unit,
     onPauseButtonClicked: () -> Unit,
@@ -271,6 +300,34 @@ private fun ClockScreen(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
+        AnimatedVisibility(visible = showTutorial) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Icon(
+                    modifier = Modifier
+                        .padding(end = 12.dp)
+                        .size(32.dp)
+                        .rotate(touchIndicatorRotateValue),
+                    painter = painterResource(id = R.drawable.ic_touch),
+                    contentDescription = "Rounded Image Button",
+                    tint = MaterialTheme.colors.onSecondary
+                )
+                Text(
+                    modifier = Modifier.rotate(-touchIndicatorRotateValue),
+                    text = "touch anywhere",
+                    style = MaterialTheme.typography.h6.copy(
+                        color = MaterialTheme.colors.onSecondary,
+                        fontWeight = FontWeight.ExtraBold,
+                        fontFamily = FontFamily.Monospace,
+                        letterSpacing = 4.sp,
+                        textAlign = TextAlign.Center,
+                    )
+                )
+            }
+        }
         if (clockState == ClockState.Started) {
             AnimatedCircle(
                 turn = turn,
