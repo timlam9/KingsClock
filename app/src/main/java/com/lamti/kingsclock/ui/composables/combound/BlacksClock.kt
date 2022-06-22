@@ -39,7 +39,7 @@ fun BlacksClock(
     enabled: Boolean,
     strokeCircleColor: Color = LightGray,
     indicatorColor: Color = MaterialTheme.colors.primary,
-    strokeWidth: Float = 38f,
+    strokeWidth: Float = 24f,
     currentTimeMillis: Long,
     maxTimeMillis: Long,
     formattedTime: String
@@ -82,7 +82,7 @@ fun BlacksClock(
                     startAngle = 0f,
                     sweepAngle = 180f * percentage,
                     useCenter = false,
-                    style = Stroke(width = strokeWidth + 30, cap = StrokeCap.Round)
+                    style = Stroke(width = strokeWidth + 20, cap = StrokeCap.Round)
                 )
             },
         contentAlignment = Alignment.Center
