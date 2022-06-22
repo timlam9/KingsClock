@@ -30,7 +30,8 @@ import com.lamti.kingsclock.ui.screens.Screen.ClockScreen
 import com.lamti.kingsclock.ui.screens.Screen.PickerScreen
 import com.lamti.kingsclock.ui.theme.KingsClockTheme
 import com.lamti.kingsclock.ui.uistate.MainViewModel
-import com.lamti.kingsclock.ui.uistate.UIEvent
+import com.lamti.kingsclock.ui.uistate.UIEvent.ClockSelected
+import com.lamti.kingsclock.ui.uistate.UIEvent.SettingsClicked
 
 class MainActivity : ComponentActivity() {
 
@@ -40,7 +41,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         installSplashScreen().apply {
             setKeepOnScreenCondition {
-                viewModel.isLoading.value
+                viewModel.uiState.isLoading
             }
         }
         hideSystemUI()
@@ -55,7 +56,7 @@ class MainActivity : ComponentActivity() {
                     val screenHeight = configuration.screenHeightDp.dp
 
                     val screenTransition by animateDpAsState(
-                        targetValue = if (viewModel.currentScreen == PickerScreen) 0.dp else screenHeight,
+                        targetValue = if (viewModel.uiState.screen == PickerScreen) 0.dp else screenHeight,
                         animationSpec = tween(
                             durationMillis = 150,
                             delayMillis = 0,
@@ -63,14 +64,14 @@ class MainActivity : ComponentActivity() {
                         ),
                     )
 
-                    when (viewModel.currentScreen) {
+                    when (viewModel.uiState.screen) {
                         ClockScreen -> ClockScreen(
-                            chessClock = viewModel.chessClock,
-                            onSettingsClicked = { viewModel.onEvent(UIEvent.SettingsClicked) }
+                            chessClock = viewModel.uiState.clock,
+                            onSettingsClicked = { viewModel.onEvent(SettingsClicked) }
                         )
                         PickerScreen -> ClockPickerScreen(
                             modifier = Modifier.offset(y = screenTransition),
-                            onTimeSelected = { viewModel.onEvent(UIEvent.ClockSelected(it)) },
+                            onTimeSelected = { viewModel.onEvent(ClockSelected(it)) },
                         )
                     }
                 }
