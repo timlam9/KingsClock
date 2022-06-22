@@ -16,9 +16,6 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
@@ -29,10 +26,11 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import com.lamti.kingsclock.ui.screens.ClockPickerScreen
 import com.lamti.kingsclock.ui.screens.ClockScreen
-import com.lamti.kingsclock.ui.screens.Screen
+import com.lamti.kingsclock.ui.screens.Screen.ClockScreen
+import com.lamti.kingsclock.ui.screens.Screen.PickerScreen
 import com.lamti.kingsclock.ui.theme.KingsClockTheme
-import com.lamti.kingsclock.ui.uistate.ChessClock
 import com.lamti.kingsclock.ui.uistate.MainViewModel
+import com.lamti.kingsclock.ui.uistate.UIEvent
 
 class MainActivity : ComponentActivity() {
 
@@ -56,11 +54,8 @@ class MainActivity : ComponentActivity() {
                     val configuration = LocalConfiguration.current
                     val screenHeight = configuration.screenHeightDp.dp
 
-                    var currentScreen: Screen by remember { mutableStateOf(Screen.ClockScreen) }
-                    var chessClock: ChessClock by remember { mutableStateOf(ChessClock(1, 0)) }
-
                     val screenTransition by animateDpAsState(
-                        targetValue = if (currentScreen == Screen.PickerScreen) 0.dp else screenHeight,
+                        targetValue = if (viewModel.currentScreen == PickerScreen) 0.dp else screenHeight,
                         animationSpec = tween(
                             durationMillis = 150,
                             delayMillis = 0,
@@ -68,16 +63,15 @@ class MainActivity : ComponentActivity() {
                         ),
                     )
 
-                    when (currentScreen) {
-                        Screen.ClockScreen -> ClockScreen(chessClock = chessClock) {
-                            currentScreen = Screen.PickerScreen
-                        }
-                        Screen.PickerScreen -> ClockPickerScreen(
-                            modifier = Modifier.offset(y = screenTransition)
-                        ) {
-                            chessClock = it
-                            currentScreen = Screen.ClockScreen
-                        }
+                    when (viewModel.currentScreen) {
+                        ClockScreen -> ClockScreen(
+                            chessClock = viewModel.chessClock,
+                            onSettingsClicked = { viewModel.onEvent(UIEvent.SettingsClicked) }
+                        )
+                        PickerScreen -> ClockPickerScreen(
+                            modifier = Modifier.offset(y = screenTransition),
+                            onTimeSelected = { viewModel.onEvent(UIEvent.ClockSelected(it)) },
+                        )
                     }
                 }
             }
