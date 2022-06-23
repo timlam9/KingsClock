@@ -7,36 +7,65 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.lamti.kingsclock.ui.screens.Screen.ClockScreen
 import com.lamti.kingsclock.ui.screens.Screen.PickerScreen
-import kotlinx.coroutines.launch
+import com.lamti.kingsclock.ui.uistate.UIState.Companion.initialState
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 
 class MainViewModel : ViewModel() {
 
-    var uiState: UIState by mutableStateOf(
-        UIState(
-            isLoading = true,
-            screen = ClockScreen,
-            clock = ChessClock(minutes = 0, seconds = 0)
-        )
-    )
+    var uiState: UIState by mutableStateOf(initialState)
         private set
 
+    private val _eventFlow = MutableSharedFlow<UIEvent>(extraBufferCapacity = 16)
+
     init {
-        viewModelScope.launch {
-            uiState = uiState.copy(isLoading = false)
+        _eventFlow.process().launchIn(viewModelScope)
+    }
+
+    fun sendEvent(event: UIEvent) = _eventFlow.tryEmit(event)
+
+    private fun Flow<UIEvent>.process() = onEach {
+        when (it) {
+            is UIEvent.ClockSelected -> onClockSelected(it.clock)
+            is UIEvent.ClockStateChanged -> onClockStateChanged(it.clockState)
+            UIEvent.Initialize -> onInitialize()
+            UIEvent.SettingsClicked -> onSettingsButtonClicked()
         }
     }
 
-    fun onEvent(event: UIEvent) {
-        uiState = when (event) {
-            is UIEvent.ClockSelected -> {
-                uiState.copy(
-                    clock = event.clock,
-                    screen = ClockScreen
-                )
+    private fun onInitialize() {
+        uiState = uiState.copy(showPauseWidgets = true)
+    }
+
+    private fun onClockSelected(clock: ChessClock) {
+        uiState = uiState.copy(
+            clock = clock,
+            screen = ClockScreen
+        )
+    }
+
+    private fun onClockStateChanged(clockState: ClockState) {
+        uiState = when (clockState) {
+            ClockState.Idle -> {
+                uiState.copy(showPauseWidgets = true)
             }
-            UIEvent.SettingsClicked -> {
-                uiState.copy(screen = PickerScreen)
+            ClockState.Started -> {
+                uiState.copy(showPauseWidgets = false)
             }
+            ClockState.Paused -> {
+                uiState.copy(showPauseWidgets = true)
+            }
+            ClockState.Finished -> {
+                uiState.copy(showPauseWidgets = false)
+            }
+        }.run {
+            copy(clockState = clockState)
         }
+    }
+
+    private fun onSettingsButtonClicked() {
+        uiState = uiState.copy(screen = PickerScreen)
     }
 }

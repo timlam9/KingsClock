@@ -54,16 +54,26 @@ import com.lamti.kingsclock.ui.drawColoredShadow
 import com.lamti.kingsclock.ui.theme.Blue
 import com.lamti.kingsclock.ui.theme.KingsClockTheme
 import com.lamti.kingsclock.ui.theme.Red
-import com.lamti.kingsclock.ui.uistate.ChessClock
 import com.lamti.kingsclock.ui.uistate.ClockState
 import com.lamti.kingsclock.ui.uistate.Timer
 import com.lamti.kingsclock.ui.uistate.Turn
+import com.lamti.kingsclock.ui.uistate.UIEvent
+import com.lamti.kingsclock.ui.uistate.UIState
+import kotlinx.coroutines.channels.Channel
 
 private const val START = "start"
 private const val RESUME = "resume"
 
 @Composable
-fun ClockScreen(chessClock: ChessClock, onSettingsClicked: () -> Unit) {
+fun ClockScreen(
+    state: UIState,
+    eventChannel: Channel<UIEvent>
+) {
+
+    LaunchedEffect(false) {
+        eventChannel.trySend(UIEvent.Initialize)
+    }
+
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp.dp
     val screenHeight = configuration.screenHeightDp.dp
@@ -71,10 +81,8 @@ fun ClockScreen(chessClock: ChessClock, onSettingsClicked: () -> Unit) {
     val blacksStartedTranslationValue = -screenHeight
     val whitesStartedTranslationValue = screenHeight
 
-    var clockState by rememberSaveable { mutableStateOf(ClockState.Idle) }
     var turn by rememberSaveable { mutableStateOf(Turn.Whites) }
 
-    var showPauseWidgets by rememberSaveable { mutableStateOf(false) }
     var showMenuCloseIcon by rememberSaveable { mutableStateOf(false) }
     var showBlacksClock by rememberSaveable { mutableStateOf(false) }
     var showWhitesClock by rememberSaveable { mutableStateOf(false) }
@@ -85,30 +93,30 @@ fun ClockScreen(chessClock: ChessClock, onSettingsClicked: () -> Unit) {
     var rotateTouchIndicator by rememberSaveable { mutableStateOf(false) }
     val touchIndicatorRotateValue by animateFloatAsState(if (rotateTouchIndicator) 180f else 0f)
 
-    val playButtonScale by animateFloatAsState(if (showPauseWidgets) 1f else 0f)
+    val playButtonScale by animateFloatAsState(if (state.showPauseWidgets) 1f else 0f)
     var playButtonText by remember { mutableStateOf(START) }
 
     val blacksTimerTranslationX by animateDpAsState(
-        targetValue = if (showPauseWidgets) 0.dp else -screenWidth,
+        targetValue = if (state.showPauseWidgets) 0.dp else -screenWidth,
         animationSpec = tween(
             durationMillis = 150,
-            delayMillis = if (showPauseWidgets) 100 else 30,
+            delayMillis = if (state.showPauseWidgets) 100 else 30,
             easing = FastOutSlowInEasing
         ),
     )
     val whitesTimerTranslationX by animateDpAsState(
-        targetValue = if (showPauseWidgets) 0.dp else -screenWidth,
+        targetValue = if (state.showPauseWidgets) 0.dp else -screenWidth,
         animationSpec = tween(
             durationMillis = 150,
-            delayMillis = if (showPauseWidgets) 140 else 70,
+            delayMillis = if (state.showPauseWidgets) 140 else 70,
             easing = FastOutSlowInEasing
         ),
     )
     val settingsIconTranslationY by animateDpAsState(
-        targetValue = if (showPauseWidgets && !showMenuCloseIcon) screenHeight / 2.7f else screenHeight,
+        targetValue = if (state.showPauseWidgets && !showMenuCloseIcon) screenHeight / 2.7f else screenHeight,
         animationSpec = tween(
             durationMillis = 100,
-            delayMillis = if (showPauseWidgets && !showMenuCloseIcon) 170 else 25,
+            delayMillis = if (state.showPauseWidgets && !showMenuCloseIcon) 170 else 25,
             easing = FastOutSlowInEasing
         ),
     )
@@ -122,7 +130,7 @@ fun ClockScreen(chessClock: ChessClock, onSettingsClicked: () -> Unit) {
     )
 
     val whitesClockTranslationY by animateDpAsState(
-        when (clockState) {
+        when (state.clockState) {
             ClockState.Idle -> whitesStartedTranslationValue
             ClockState.Started -> 0.dp
             ClockState.Paused -> whitesStartedTranslationValue
@@ -130,7 +138,7 @@ fun ClockScreen(chessClock: ChessClock, onSettingsClicked: () -> Unit) {
         }
     )
     val blacksClockTranslationY by animateDpAsState(
-        when (clockState) {
+        when (state.clockState) {
             ClockState.Idle -> blacksStartedTranslationValue
             ClockState.Started -> 0.dp
             ClockState.Paused -> blacksStartedTranslationValue
@@ -138,11 +146,10 @@ fun ClockScreen(chessClock: ChessClock, onSettingsClicked: () -> Unit) {
         }
     )
 
-    LaunchedEffect(clockState) {
-        when (clockState) {
+    LaunchedEffect(state.clockState) {
+        when (state.clockState) {
             ClockState.Idle -> {
                 playButtonText = START
-                showPauseWidgets = true
                 showBlacksClock = false
                 showWhitesClock = false
                 showRestartButton = false
@@ -152,7 +159,6 @@ fun ClockScreen(chessClock: ChessClock, onSettingsClicked: () -> Unit) {
                 rotateTouchIndicator = false
             }
             ClockState.Started -> {
-                showPauseWidgets = false
                 showBlacksClock = true
                 showWhitesClock = true
                 showRestartButton = false
@@ -162,7 +168,6 @@ fun ClockScreen(chessClock: ChessClock, onSettingsClicked: () -> Unit) {
             }
             ClockState.Paused -> {
                 playButtonText = RESUME
-                showPauseWidgets = true
                 showBlacksClock = false
                 showWhitesClock = false
                 showRestartButton = false
@@ -171,7 +176,6 @@ fun ClockScreen(chessClock: ChessClock, onSettingsClicked: () -> Unit) {
                 showTouchIndicator = false
             }
             ClockState.Finished -> {
-                showPauseWidgets = false
                 showBlacksClock = true
                 showWhitesClock = true
                 showRestartButton = true
@@ -183,9 +187,9 @@ fun ClockScreen(chessClock: ChessClock, onSettingsClicked: () -> Unit) {
     }
 
     ClockScreen(
-        clockState = clockState,
+        clockState = state.clockState,
         turn = turn,
-        maxTimeMillis = (chessClock.minutes * 60 * 1000L) + (chessClock.seconds * 1000L),
+        maxTimeMillis = (state.clock.minutes * 60 * 1000L) + (state.clock.seconds * 1000L),
         playButtonText = playButtonText,
         screenWidth = screenWidth,
         blacksClockTranslationY = blacksClockTranslationY,
@@ -206,19 +210,19 @@ fun ClockScreen(chessClock: ChessClock, onSettingsClicked: () -> Unit) {
             rotateTouchIndicator = true
             turn = turn.changeClock()
         },
-        onStartButtonClicked = { clockState = ClockState.Started },
-        onPauseButtonClicked = { clockState = ClockState.Paused },
-        onBlacksTimerFinished = { clockState = ClockState.Finished },
-        onWhitesTimerFinished = { clockState = ClockState.Finished },
+        onStartButtonClicked = { eventChannel.trySend(UIEvent.ClockStateChanged(ClockState.Started)) },
+        onPauseButtonClicked = { eventChannel.trySend(UIEvent.ClockStateChanged(ClockState.Paused)) },
+        onBlacksTimerFinished = { eventChannel.trySend(UIEvent.ClockStateChanged(ClockState.Finished)) },
+        onWhitesTimerFinished = { eventChannel.trySend(UIEvent.ClockStateChanged(ClockState.Finished)) },
         onRestartButtonClicked = {
             turn = Turn.Whites
-            clockState = ClockState.Started
+            eventChannel.trySend(UIEvent.ClockStateChanged(ClockState.Started))
         },
         onCloseButtonClicked = {
             turn = Turn.Whites
-            clockState = ClockState.Idle
+            eventChannel.trySend(UIEvent.ClockStateChanged(ClockState.Idle))
         },
-        onSettingsClicked = onSettingsClicked
+        onSettingsClicked = { eventChannel.trySend(UIEvent.SettingsClicked) }
     )
 }
 
@@ -448,8 +452,6 @@ private fun ClockScreen(
 @Composable
 fun DefaultPreview() {
     KingsClockTheme {
-        ClockScreen(ChessClock(1, 0)) {
-
-        }
+        ClockScreen(UIState.initialState, Channel { })
     }
 }
