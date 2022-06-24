@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
@@ -50,7 +51,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         installSplashScreen().apply {
             setKeepOnScreenCondition {
-                viewModel.uiState.isLoading
+                viewModel.uiState.value.isLoading
             }
         }
 
@@ -70,8 +71,10 @@ class MainActivity : ComponentActivity() {
                     val configuration = LocalConfiguration.current
                     val screenHeight = configuration.screenHeightDp.dp
 
+                    val state by viewModel.uiState.collectAsState()
+
                     val screenTransition by animateDpAsState(
-                        targetValue = if (viewModel.uiState.screen == PickerScreen) 0.dp else screenHeight,
+                        targetValue = if (state.screen == PickerScreen) 0.dp else screenHeight,
                         animationSpec = tween(
                             durationMillis = 150,
                             delayMillis = 0,
@@ -79,9 +82,9 @@ class MainActivity : ComponentActivity() {
                         ),
                     )
 
-                    when (viewModel.uiState.screen) {
+                    when (state.screen) {
                         ClockScreen -> ClockScreen(
-                            state = viewModel.uiState,
+                            state = state,
                             eventChannel = eventChannel
                         )
                         PickerScreen -> ClockPickerScreen(

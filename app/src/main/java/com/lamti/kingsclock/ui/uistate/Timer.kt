@@ -8,6 +8,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.LocalDateTime
@@ -19,7 +23,9 @@ class Timer(private val startTime: Long) {
 
     var formattedTime by mutableStateOf(formatTime(startTime))
     var timeMillis by mutableStateOf(startTime)
-    var isTimerFinished by mutableStateOf(false)
+
+    private val _isTimerFinished = MutableStateFlow(false)
+    val isTimerFinished: StateFlow<Boolean> = _isTimerFinished.asStateFlow()
 
     private var coroutineScope = CoroutineScope(Dispatchers.Main)
     private var isActive = false
@@ -39,7 +45,7 @@ class Timer(private val startTime: Long) {
 
                 formattedTime = if (timeMillis <= 0) {
                     pause()
-                    isTimerFinished = true
+                    _isTimerFinished.update { true }
                     "time's up".uppercase()
                 } else {
                     formatTime(timeMillis)
@@ -59,7 +65,7 @@ class Timer(private val startTime: Long) {
         lastTimestamp = 0L
         formattedTime = formatTime(startTime)
         isActive = false
-        isTimerFinished = false
+        _isTimerFinished.update { false }
     }
 
     private fun formatTime(timeMillis: Long): String {

@@ -1,8 +1,5 @@
 package com.lamti.kingsclock.ui.uistate
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.lamti.kingsclock.ui.screens.Screen.ClockScreen
@@ -12,18 +9,27 @@ import com.lamti.kingsclock.ui.uistate.UIState.Companion.START
 import com.lamti.kingsclock.ui.uistate.UIState.Companion.initialState
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.update
 
 class MainViewModel : ViewModel() {
 
-    var uiState: UIState by mutableStateOf(initialState)
-        private set
+    private val _uiState = MutableStateFlow(initialState)
+    val uiState: StateFlow<UIState> = _uiState.asStateFlow()
 
     private val _eventFlow = MutableSharedFlow<UIEvent>(extraBufferCapacity = 16)
 
     init {
         _eventFlow.process().launchIn(viewModelScope)
+        _uiState.onEach {
+            it.whitesTimer.isTimerFinished.onEach { isFinished ->
+                if (isFinished) onWhitesTimerFinished()
+            }.launchIn(viewModelScope)
+        }.launchIn(viewModelScope)
     }
 
     fun sendEvent(event: UIEvent) = _eventFlow.tryEmit(event)
@@ -43,12 +49,57 @@ class MainViewModel : ViewModel() {
         }
     }
 
+    private fun onInitialize() {
+        _uiState.update {
+            _uiState.value.copy(showPauseWidgets = true)
+        }
+    }
+
     private fun onStartButtonClicked() {
         onClockStateChanged(ClockState.Started)
     }
 
     private fun onPauseButtonClicked() {
         onClockStateChanged(ClockState.Paused)
+    }
+
+    private fun onRestartButtonClicked() {
+        _uiState.value.blacksTimer.reset()
+        _uiState.value.whitesTimer.reset()
+        _uiState.update {
+            uiState.value.copy(
+                turn = Turn.Whites,
+                clockState = ClockState.Started
+            )
+        }
+        onClockStateChanged(_uiState.value.clockState)
+    }
+
+    private fun onBackgroundClicked() {
+        _uiState.update {
+            _uiState.value.copy(
+                showTouchIndicator = if (_uiState.value.rotateTouchIndicator) false else _uiState.value.showTouchIndicator,
+                rotateTouchIndicator = true,
+                turn = _uiState.value.turn.changeClock()
+            )
+        }
+        startProperTimer()
+    }
+
+    private fun onCloseButtonClicked() {
+        _uiState.value.blacksTimer.reset()
+        _uiState.value.whitesTimer.reset()
+        _uiState.update {
+            _uiState.value.copy(
+                turn = Turn.Whites,
+                clockState = ClockState.Idle
+            )
+        }
+        onClockStateChanged(_uiState.value.clockState)
+    }
+
+    private fun onSettingsButtonClicked() {
+        _uiState.update { _uiState.value.copy(screen = PickerScreen) }
     }
 
     private fun onBlacksTimerFinished() {
@@ -59,45 +110,23 @@ class MainViewModel : ViewModel() {
         onClockStateChanged(ClockState.Finished)
     }
 
-    private fun onInitialize() {
-        uiState = uiState.copy(showPauseWidgets = true)
-    }
-
-    private fun onBackgroundClicked() {
-        uiState = uiState.copy(
-            showTouchIndicator = if (uiState.rotateTouchIndicator) false else uiState.showTouchIndicator,
-            rotateTouchIndicator = true,
-            turn = uiState.turn.changeClock()
-        )
-    }
-
-    private fun onRestartButtonClicked() {
-        uiState = uiState.copy(
-            turn = Turn.Whites,
-            clockState = ClockState.Started
-        )
-        onClockStateChanged(uiState.clockState)
-    }
-
-    private fun onCloseButtonClicked() {
-        uiState = uiState.copy(
-            turn = Turn.Whites,
-            clockState = ClockState.Idle
-        )
-        onClockStateChanged(uiState.clockState)
-    }
-
     private fun onClockSelected(clock: ChessClock) {
-        uiState = uiState.copy(
-            clock = clock,
-            screen = ClockScreen
-        )
+        val maxTimeMillis = (clock.minutes * 60 * 1000L) + (clock.seconds * 1000L)
+
+        _uiState.update {
+            _uiState.value.copy(
+                clock = clock,
+                screen = ClockScreen,
+                whitesTimer = Timer(maxTimeMillis),
+                blacksTimer = Timer(maxTimeMillis)
+            )
+        }
     }
 
     private fun onClockStateChanged(clockState: ClockState) {
-        uiState = when (clockState) {
+        _uiState.value = when (clockState) {
             ClockState.Idle -> {
-                uiState.copy(
+                _uiState.value.copy(
                     startButtonText = START,
                     showPauseWidgets = true,
                     showBlacksClock = false,
@@ -110,9 +139,10 @@ class MainViewModel : ViewModel() {
                 )
             }
             ClockState.Started -> {
-                uiState.copy(
+                startProperTimer()
+                _uiState.value.copy(
                     showTouchIndicator =
-                    if (!uiState.rotateTouchIndicator) true else uiState.showTouchIndicator,
+                    if (!_uiState.value.rotateTouchIndicator) true else _uiState.value.showTouchIndicator,
                     showPauseWidgets = false,
                     showBlacksClock = true,
                     showWhitesClock = true,
@@ -122,7 +152,10 @@ class MainViewModel : ViewModel() {
                 )
             }
             ClockState.Paused -> {
-                uiState.copy(
+                _uiState.value.whitesTimer.pause()
+                _uiState.value.blacksTimer.pause()
+
+                _uiState.value.copy(
                     startButtonText = RESUME,
                     showPauseWidgets = true,
                     showBlacksClock = false,
@@ -134,7 +167,7 @@ class MainViewModel : ViewModel() {
                 )
             }
             ClockState.Finished -> {
-                uiState.copy(
+                _uiState.value.copy(
                     showPauseWidgets = false,
                     showBlacksClock = true,
                     showWhitesClock = true,
@@ -149,7 +182,16 @@ class MainViewModel : ViewModel() {
         }
     }
 
-    private fun onSettingsButtonClicked() {
-        uiState = uiState.copy(screen = PickerScreen)
+    private fun startProperTimer() {
+        when (_uiState.value.turn) {
+            Turn.Blacks -> {
+                _uiState.value.whitesTimer.pause()
+                _uiState.value.blacksTimer.start()
+            }
+            Turn.Whites -> {
+                _uiState.value.whitesTimer.start()
+                _uiState.value.blacksTimer.pause()
+            }
+        }
     }
 }
