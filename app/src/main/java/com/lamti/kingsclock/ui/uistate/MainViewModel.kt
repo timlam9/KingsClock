@@ -29,6 +29,10 @@ class MainViewModel : ViewModel() {
             it.whitesTimer.isTimerFinished.onEach { isFinished ->
                 if (isFinished) onWhitesTimerFinished()
             }.launchIn(viewModelScope)
+
+            it.blacksTimer.isTimerFinished.onEach { isFinished ->
+                if (isFinished) onBlacksTimerFinished()
+            }.launchIn(viewModelScope)
         }.launchIn(viewModelScope)
     }
 

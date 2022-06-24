@@ -22,47 +22,50 @@ fun PauseButtons(
     enabledClockState: Turn,
     screenWidth: Dp,
     onPauseButtonClicked: () -> Unit,
-    showWhitesClock: Boolean
+    showWhitesClock: Boolean,
+    showButtons: Boolean
 ) {
     val density = LocalDensity.current
     val offsetY = remember { screenWidth / 2 }
     val offsetX = remember { offsetY - 50.dp }
 
-    AnimatedVisibility(
-        visible = showBlacksClock && enabledClockState == Turn.Blacks,
-        enter = slideInHorizontally {
-            with(density) { -300.dp.roundToPx() }
-        },
-        exit = slideOutHorizontally {
-            with(density) { -300.dp.roundToPx() }
+    AnimatedVisibility(showButtons) {
+        AnimatedVisibility(
+            visible = showBlacksClock && enabledClockState == Turn.Blacks,
+            enter = slideInHorizontally {
+                with(density) { -300.dp.roundToPx() }
+            },
+            exit = slideOutHorizontally {
+                with(density) { -300.dp.roundToPx() }
+            }
+        ) {
+            RoundedIcon(
+                modifier = Modifier
+                    .rotate(180f)
+                    .offset(x = offsetX, y = offsetY),
+                icon = R.drawable.ic_pause,
+                color = MaterialTheme.colors.onSurface,
+                tint = MaterialTheme.colors.primary,
+                onClick = onPauseButtonClicked
+            )
         }
-    ) {
-        RoundedIcon(
-            modifier = Modifier
-                .rotate(180f)
-                .offset(x = offsetX, y = offsetY),
-            icon = R.drawable.ic_pause,
-            color = MaterialTheme.colors.onSurface,
-            tint = MaterialTheme.colors.primary,
-            onClick = onPauseButtonClicked
-        )
-    }
-    AnimatedVisibility(
-        visible = showWhitesClock && enabledClockState == Turn.Whites,
-        enter = slideInHorizontally {
-            with(density) { 300.dp.roundToPx() }
-        },
-        exit = slideOutHorizontally {
-            with(density) { 300.dp.roundToPx() }
+        AnimatedVisibility(
+            visible = showWhitesClock && enabledClockState == Turn.Whites,
+            enter = slideInHorizontally {
+                with(density) { 300.dp.roundToPx() }
+            },
+            exit = slideOutHorizontally {
+                with(density) { 300.dp.roundToPx() }
+            }
+        ) {
+            RoundedIcon(
+                modifier = Modifier
+                    .offset(x = offsetX, y = offsetY),
+                icon = R.drawable.ic_pause,
+                color = MaterialTheme.colors.onSurface,
+                tint = MaterialTheme.colors.onPrimary,
+                onClick = onPauseButtonClicked
+            )
         }
-    ) {
-        RoundedIcon(
-            modifier = Modifier
-                .offset(x = offsetX, y = offsetY),
-            icon = R.drawable.ic_pause,
-            color = MaterialTheme.colors.onSurface,
-            tint = MaterialTheme.colors.onPrimary,
-            onClick = onPauseButtonClicked
-        )
     }
 }

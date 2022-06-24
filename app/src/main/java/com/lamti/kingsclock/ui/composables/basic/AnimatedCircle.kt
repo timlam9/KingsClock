@@ -17,6 +17,7 @@ import com.lamti.kingsclock.ui.uistate.Turn
 @Composable
 fun AnimatedCircle(
     modifier: Modifier = Modifier,
+    showCircle: Boolean,
     turn: Turn
 ) {
     val configuration = LocalConfiguration.current
@@ -27,18 +28,20 @@ fun AnimatedCircle(
     val offset by animateDpAsState(if (turn == Turn.Whites) baseOffset else -baseOffset)
     val color by animateColorAsState(if (turn == Turn.Whites) MaterialTheme.colors.onPrimary else MaterialTheme.colors.primary)
 
-    Canvas(
-        modifier = modifier
-            .size(screenWidth)
-            .offset(y = offset)
-    ) {
-        val canvasWidth = size.width
-        val canvasHeight = size.height
+    if (showCircle) {
+        Canvas(
+            modifier = modifier
+                .size(screenWidth)
+                .offset(y = offset)
+        ) {
+            val canvasWidth = size.width
+            val canvasHeight = size.height
 
-        drawCircle(
-            color = color,
-            center = Offset(x = canvasWidth / 2, y = canvasHeight / 2),
-            radius = screenWidth.toPx() / 2
-        )
+            drawCircle(
+                color = color,
+                center = Offset(x = canvasWidth / 2, y = canvasHeight / 2),
+                radius = screenWidth.toPx() / 2
+            )
+        }
     }
 }
