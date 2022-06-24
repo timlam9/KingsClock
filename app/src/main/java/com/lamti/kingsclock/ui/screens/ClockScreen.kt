@@ -66,7 +66,6 @@ fun ClockScreen(
     state: UIState,
     eventChannel: Channel<UIEvent>
 ) {
-
     LaunchedEffect(false) {
         eventChannel.trySend(UIEvent.Initialize)
     }
@@ -74,10 +73,6 @@ fun ClockScreen(
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp.dp
     val screenHeight = configuration.screenHeightDp.dp
-
-    val blacksStartedTranslationValue = -screenHeight
-    val whitesStartedTranslationValue = screenHeight
-
 
     val touchIndicatorRotateValue by animateFloatAsState(if (state.rotateTouchIndicator) 180f else 0f)
     val playButtonScale by animateFloatAsState(if (state.showPauseWidgets) 1f else 0f)
@@ -117,26 +112,25 @@ fun ClockScreen(
 
     val whitesClockTranslationY by animateDpAsState(
         when (state.clockState) {
-            ClockState.Idle -> whitesStartedTranslationValue
+            ClockState.Idle -> screenHeight
             ClockState.Started -> 0.dp
-            ClockState.Paused -> whitesStartedTranslationValue
+            ClockState.Paused -> screenHeight
             ClockState.Finished -> 0.dp
         }
     )
     val blacksClockTranslationY by animateDpAsState(
         when (state.clockState) {
-            ClockState.Idle -> blacksStartedTranslationValue
+            ClockState.Idle -> -screenHeight
             ClockState.Started -> 0.dp
-            ClockState.Paused -> blacksStartedTranslationValue
+            ClockState.Paused -> -screenHeight
             ClockState.Finished -> 0.dp
         }
     )
 
     ClockScreen(
+        state = state,
+        eventChannel = eventChannel,
         clockState = state.clockState,
-        turn = state.turn,
-        maxTimeMillis = (state.clock.minutes * 60 * 1000L) + (state.clock.seconds * 1000L),
-        playButtonText = state.startButtonText,
         screenWidth = screenWidth,
         blacksClockTranslationY = blacksClockTranslationY,
         whitesClockTranslationY = whitesClockTranslationY,
@@ -145,29 +139,15 @@ fun ClockScreen(
         whitesTimerTranslationX = whitesTimerTranslationX,
         settingsIconTranslationY = settingsIconTranslationY,
         menuCloseIconTranslationY = menuCloseIconTranslationY,
-        showBlacksClock = state.showBlacksClock,
-        showWhitesClock = state.showWhitesClock,
-        showRestartButton = state.showRestartButton,
-        showCloseButton = state.showCloseButton,
-        showTutorial = state.showTouchIndicator,
         touchIndicatorRotateValue = touchIndicatorRotateValue,
-        onBackgroundClicked = { eventChannel.trySend(UIEvent.BackgroundClicked) },
-        onStartButtonClicked = { eventChannel.trySend(UIEvent.StartButtonClicked) },
-        onPauseButtonClicked = { eventChannel.trySend(UIEvent.PauseButtonClicked) },
-        onBlacksTimerFinished = { eventChannel.trySend(UIEvent.BlacksTimerFinished) },
-        onWhitesTimerFinished = { eventChannel.trySend(UIEvent.WhitesTimerFinished) },
-        onRestartButtonClicked = { eventChannel.trySend(UIEvent.RestartButtonClicked) },
-        onCloseButtonClicked = { eventChannel.trySend(UIEvent.CloseButtonClicked) },
-        onSettingsClicked = { eventChannel.trySend(UIEvent.SettingsClicked) }
     )
 }
 
 @Composable
 private fun ClockScreen(
+    state: UIState,
+    eventChannel: Channel<UIEvent>,
     clockState: ClockState,
-    turn: Turn,
-    maxTimeMillis: Long,
-    playButtonText: String,
     blacksClockTranslationY: Dp,
     whitesClockTranslationY: Dp,
     screenWidth: Dp,
@@ -176,23 +156,12 @@ private fun ClockScreen(
     whitesTimerTranslationX: Dp,
     settingsIconTranslationY: Dp,
     menuCloseIconTranslationY: Dp,
-    showBlacksClock: Boolean,
-    showWhitesClock: Boolean,
-    showRestartButton: Boolean,
-    showCloseButton: Boolean,
-    showTutorial: Boolean,
     touchIndicatorRotateValue: Float,
-    onBackgroundClicked: () -> Unit,
-    onStartButtonClicked: () -> Unit,
-    onPauseButtonClicked: () -> Unit,
-    onBlacksTimerFinished: () -> Unit,
-    onWhitesTimerFinished: () -> Unit,
-    onRestartButtonClicked: () -> Unit,
-    onCloseButtonClicked: () -> Unit,
-    onSettingsClicked: () -> Unit,
 ) {
     val context = LocalContext.current
     var sound by remember { mutableStateOf(R.raw.intro) }
+
+    val maxTimeMillis = remember { (state.clock.minutes * 60 * 1000L) + (state.clock.seconds * 1000L) }
 
     LaunchedEffect(sound) {
         try {
@@ -206,15 +175,15 @@ private fun ClockScreen(
     val blacksTimer = remember { Timer(maxTimeMillis) }
 
     LaunchedEffect(blacksTimer.isTimerFinished) {
-        if (blacksTimer.isTimerFinished) onBlacksTimerFinished()
+        if (blacksTimer.isTimerFinished) eventChannel.trySend(UIEvent.BlacksTimerFinished)
     }
     LaunchedEffect(whitesTimer.isTimerFinished) {
-        if (whitesTimer.isTimerFinished) onWhitesTimerFinished()
+        if (whitesTimer.isTimerFinished) eventChannel.trySend(UIEvent.WhitesTimerFinished)
     }
-    LaunchedEffect(clockState, turn) {
+    LaunchedEffect(clockState, state.turn) {
         when (clockState) {
             ClockState.Started -> {
-                when (turn) {
+                when (state.turn) {
                     Turn.Blacks -> {
                         whitesTimer.pause()
                         blacksTimer.start()
@@ -240,7 +209,7 @@ private fun ClockScreen(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        AnimatedVisibility(visible = showTutorial) {
+        AnimatedVisibility(visible = state.showTouchIndicator) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -270,19 +239,19 @@ private fun ClockScreen(
         }
         if (clockState == ClockState.Started) {
             AnimatedCircle(
-                turn = turn,
+                turn = state.turn,
                 modifier = Modifier.offset(y = whitesClockTranslationY)
             )
         }
         Clocks(
             clockState = clockState,
             onBackgroundClicked = {
-                onBackgroundClicked()
+                eventChannel.trySend(UIEvent.BackgroundClicked)
                 sound = if (sound == R.raw.blacks) R.raw.whites else R.raw.blacks
             },
             blacksClockTranslationY = blacksClockTranslationY,
             screenWidth = screenWidth,
-            turn = turn,
+            turn = state.turn,
             whitesClockTranslationY = whitesClockTranslationY,
             whitesTimer = whitesTimer,
             blacksTimer = blacksTimer,
@@ -295,20 +264,20 @@ private fun ClockScreen(
                     .drawColoredShadow(color = Blue),
                 onClick = {
                     sound = R.raw.start
-                    onStartButtonClicked()
+                    eventChannel.trySend(UIEvent.StartButtonClicked)
                 },
                 buttonSize = screenWidth / 1.75f,
-                text = playButtonText
+                text = state.startButtonText
             )
         } else {
             RoundedTextButton(
                 modifier = Modifier.scale(scaleStartButton),
                 onClick = {
                     sound = R.raw.start
-                    onStartButtonClicked()
+                    eventChannel.trySend(UIEvent.StartButtonClicked)
                 },
                 buttonSize = screenWidth / 1.75f,
-                text = playButtonText
+                text = state.startButtonText
             )
         }
         Column(modifier = Modifier.offset(y = -screenWidth / 1.4f)) {
@@ -334,30 +303,30 @@ private fun ClockScreen(
         }
         AnimatedVisibility(clockState != ClockState.Finished) {
             PauseButtons(
-                showBlacksClock = showBlacksClock,
-                enabledClockState = turn,
+                showBlacksClock = state.showBlacksClock,
+                enabledClockState = state.turn,
                 screenWidth = screenWidth,
                 onPauseButtonClicked = {
                     sound = R.raw.pause
-                    onPauseButtonClicked()
+                    eventChannel.trySend(UIEvent.PauseButtonClicked)
                 },
-                showWhitesClock = showWhitesClock
+                showWhitesClock = state.showWhitesClock
             )
         }
         FinishButtons(
-            showRestartButton = showRestartButton,
-            showCloseButton = showCloseButton,
+            showRestartButton = state.showRestartButton,
+            showCloseButton = state.showCloseButton,
             onRestartButtonClicked = {
                 sound = R.raw.start
                 blacksTimer.reset()
                 whitesTimer.reset()
-                onRestartButtonClicked()
+                eventChannel.trySend(UIEvent.RestartButtonClicked)
             },
             onCloseButtonClicked = {
                 sound = R.raw.exit
                 blacksTimer.reset()
                 whitesTimer.reset()
-                onCloseButtonClicked()
+                eventChannel.trySend(UIEvent.CloseButtonClicked)
             }
         )
         OutlineIcon(
@@ -367,7 +336,7 @@ private fun ClockScreen(
             borderColor = MaterialTheme.colors.onSecondary,
             onClick = {
                 sound = R.raw.click
-                onSettingsClicked()
+                eventChannel.trySend(UIEvent.SettingsClicked)
             }
         )
         OutlineIcon(
@@ -379,7 +348,7 @@ private fun ClockScreen(
             sound = R.raw.exit
             blacksTimer.reset()
             whitesTimer.reset()
-            onCloseButtonClicked()
+            eventChannel.trySend(UIEvent.CloseButtonClicked)
         }
     }
 }
