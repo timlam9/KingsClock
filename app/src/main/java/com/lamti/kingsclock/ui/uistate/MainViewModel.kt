@@ -40,7 +40,6 @@ class MainViewModel : ViewModel() {
 
     private fun Flow<UIEvent>.process() = onEach {
         when (it) {
-            is UIEvent.ClockSelected -> onClockSelected(it.clock)
             UIEvent.Initialize -> onInitialize()
             UIEvent.BackgroundClicked -> onBackgroundClicked()
             UIEvent.StartButtonClicked -> onStartButtonClicked()
@@ -50,6 +49,21 @@ class MainViewModel : ViewModel() {
             UIEvent.RestartButtonClicked -> onRestartButtonClicked()
             UIEvent.CloseButtonClicked -> onCloseButtonClicked()
             UIEvent.SettingsClicked -> onSettingsButtonClicked()
+            is UIEvent.ClockModeSelected -> onClockModeSelected(it.mode, it.clock)
+        }
+    }
+
+    private fun onClockModeSelected(mode: ClockMode, clock: ChessClock) {
+        val maxTimeMillis = (clock.minutes * 60 * 1000L) + (clock.seconds * 1000L)
+
+        _uiState.update {
+            _uiState.value.copy(
+                clock = clock,
+                clockMode = mode,
+                screen = ClockScreen,
+                whitesTimer = Timer(maxTimeMillis),
+                blacksTimer = Timer(maxTimeMillis)
+            )
         }
     }
 
@@ -84,7 +98,7 @@ class MainViewModel : ViewModel() {
             _uiState.value.copy(
                 showTouchIndicator = if (_uiState.value.rotateTouchIndicator) false else _uiState.value.showTouchIndicator,
                 rotateTouchIndicator = true,
-                turn = _uiState.value.turn.changeClock()
+                turn = _uiState.value.turn.changeClock(),
             )
         }
         startProperTimer()
@@ -114,18 +128,6 @@ class MainViewModel : ViewModel() {
         onClockStateChanged(ClockState.Finished)
     }
 
-    private fun onClockSelected(clock: ChessClock) {
-        val maxTimeMillis = (clock.minutes * 60 * 1000L) + (clock.seconds * 1000L)
-
-        _uiState.update {
-            _uiState.value.copy(
-                clock = clock,
-                screen = ClockScreen,
-                whitesTimer = Timer(maxTimeMillis),
-                blacksTimer = Timer(maxTimeMillis)
-            )
-        }
-    }
 
     private fun onClockStateChanged(clockState: ClockState) {
         _uiState.value = when (clockState) {
@@ -191,10 +193,12 @@ class MainViewModel : ViewModel() {
             Turn.Blacks -> {
                 _uiState.value.whitesTimer.pause()
                 _uiState.value.blacksTimer.start()
+                _uiState.value.whitesTimer.addIncrement(10)
             }
             Turn.Whites -> {
                 _uiState.value.whitesTimer.start()
                 _uiState.value.blacksTimer.pause()
+                _uiState.value.blacksTimer.addIncrement(10)
             }
         }
     }

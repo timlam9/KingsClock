@@ -33,7 +33,6 @@ import com.lamti.kingsclock.ui.screens.Screen.PickerScreen
 import com.lamti.kingsclock.ui.theme.KingsClockTheme
 import com.lamti.kingsclock.ui.uistate.MainViewModel
 import com.lamti.kingsclock.ui.uistate.UIEvent
-import com.lamti.kingsclock.ui.uistate.UIEvent.ClockSelected
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.consumeAsFlow
@@ -89,7 +88,10 @@ class MainActivity : ComponentActivity() {
                         )
                         PickerScreen -> ClockPickerScreen(
                             modifier = Modifier.offset(y = screenTransition),
-                            onTimeSelected = { eventChannel.trySend(ClockSelected(it)) },
+                            state = state,
+                            onTimeSelected = { mode, clock ->
+                                eventChannel.trySend(UIEvent.ClockModeSelected(mode, clock))
+                            }
                         )
                     }
                 }

@@ -21,7 +21,7 @@ import kotlin.math.abs
 @Composable
 fun ChessClockPicker(
     modifier: Modifier = Modifier,
-    value: ChessClock = ChessClock(0, 0),
+    value: ChessClock = ChessClock(0, 0, 0),
     leadingZero: Boolean = true,
     minutesRange: Iterable<Int> = 0..59,
     secondsRange: Iterable<Int> = 0..59,

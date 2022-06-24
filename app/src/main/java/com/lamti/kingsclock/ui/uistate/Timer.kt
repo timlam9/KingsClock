@@ -54,6 +54,10 @@ class Timer(private val startTime: Long) {
         }
     }
 
+    fun addIncrement(increment: Int) {
+        timeMillis += increment * 1000
+    }
+
     fun pause() {
         isActive = false
     }

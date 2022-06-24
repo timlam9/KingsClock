@@ -5,6 +5,7 @@ import com.lamti.kingsclock.ui.screens.Screen
 data class UIState(
     val clockState: ClockState,
     val clock: ChessClock,
+    val clockMode: ClockMode,
     val turn: Turn,
     val whitesTimer: Timer,
     val blacksTimer: Timer,
@@ -23,8 +24,9 @@ data class UIState(
 
     companion object {
 
-        private const val INITIAL_MINUTES = 0
-        private const val INITIAL_SECONDS = 30
+        const val INITIAL_MINUTES = 0
+        const val INITIAL_SECONDS = 30
+        const val INITIAL_INCREMENT = 0
         private const val ONE_MILLI = 1000L
         private const val MAX_TIME_MILLIS = INITIAL_SECONDS * ONE_MILLI
         const val START = "start"
@@ -35,7 +37,8 @@ data class UIState(
             screen = Screen.ClockScreen,
             clockState = ClockState.Idle,
             turn = Turn.Whites,
-            clock = ChessClock(minutes = INITIAL_MINUTES, seconds = INITIAL_SECONDS),
+            clock = ChessClock(minutes = INITIAL_MINUTES, seconds = INITIAL_SECONDS, increment = INITIAL_INCREMENT),
+            clockMode = ClockMode.Custom,
             blacksTimer = Timer(MAX_TIME_MILLIS),
             whitesTimer = Timer(MAX_TIME_MILLIS),
             showPauseWidgets = false,

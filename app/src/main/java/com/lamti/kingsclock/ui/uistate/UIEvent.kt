@@ -2,7 +2,7 @@ package com.lamti.kingsclock.ui.uistate
 
 sealed class UIEvent {
 
-    data class ClockSelected(val clock: ChessClock) : UIEvent()
+    data class ClockModeSelected(val mode: ClockMode, val clock: ChessClock) : UIEvent()
 
     object Initialize : UIEvent()
 

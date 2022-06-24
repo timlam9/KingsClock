@@ -41,7 +41,8 @@ import com.lamti.kingsclock.ui.composables.picker.ChessClockPicker
 import com.lamti.kingsclock.ui.theme.Blue
 import com.lamti.kingsclock.ui.theme.TextColor
 import com.lamti.kingsclock.ui.uistate.ChessClock
-import com.lamti.kingsclock.ui.uistate.ChessMode
+import com.lamti.kingsclock.ui.uistate.ClockMode
+import com.lamti.kingsclock.ui.uistate.UIState
 
 @Composable
 fun ClockPickerScreen(
@@ -50,13 +51,14 @@ fun ClockPickerScreen(
     iconPadding: Dp = 14.dp,
     miniSpace: Dp = 10.dp,
     space: Dp = 20.dp,
-    onTimeSelected: (ChessClock) -> Unit,
+    state: UIState,
+    onTimeSelected: (ClockMode, ChessClock) -> Unit,
 ) {
     val context = LocalContext.current
-    var increment: Int by remember { mutableStateOf(0) }
-    var chessMode: ChessMode by remember { mutableStateOf(ChessMode.Custom) }
-    var pickerValue: ChessClock by remember { mutableStateOf(chessMode.clock) }
-    val transition = updateTransition(targetState = chessMode, label = "animation")
+    var increment: Int by remember { mutableStateOf(state.clock.increment) }
+    var clockMode: ClockMode by remember { mutableStateOf(state.clockMode) }
+    var pickerValue: ChessClock by remember { mutableStateOf(clockMode.clock) }
+    val transition = updateTransition(targetState = clockMode, label = "animation")
 
     var animateModeColor by remember { mutableStateOf(false) }
     val animatedColor by animateColorAsState(
@@ -101,7 +103,7 @@ fun ClockPickerScreen(
         }
     )
 
-    LaunchedEffect(chessMode) { if (chessMode != ChessMode.Custom) pickerValue = chessMode.clock }
+    LaunchedEffect(clockMode) { if (clockMode != ClockMode.Custom) pickerValue = clockMode.clock }
 
     LaunchedEffect(true) {
         context.playSound()
@@ -109,31 +111,31 @@ fun ClockPickerScreen(
 
     val bulletIconColor by transition.animateColor(label = "color") { mode ->
         when (mode) {
-            ChessMode.Bullet -> MaterialTheme.colors.primary
+            ClockMode.Bullet -> MaterialTheme.colors.primary
             else -> MaterialTheme.colors.onSecondary
         }
     }
     val blitzIconColor by transition.animateColor(label = "color") { mode ->
         when (mode) {
-            ChessMode.Blitz -> MaterialTheme.colors.primary
+            ClockMode.Blitz -> MaterialTheme.colors.primary
             else -> MaterialTheme.colors.onSecondary
         }
     }
     val rapidIconColor by transition.animateColor(label = "color") { mode ->
         when (mode) {
-            ChessMode.Rapid -> MaterialTheme.colors.primary
+            ClockMode.Rapid -> MaterialTheme.colors.primary
             else -> MaterialTheme.colors.onSecondary
         }
     }
     val classicalIconColor by transition.animateColor(label = "color") { mode ->
         when (mode) {
-            ChessMode.Classical -> MaterialTheme.colors.primary
+            ClockMode.Classical -> MaterialTheme.colors.primary
             else -> MaterialTheme.colors.onSecondary
         }
     }
     val customIconColor by transition.animateColor(label = "color") { mode ->
         when (mode) {
-            ChessMode.Custom -> MaterialTheme.colors.primary
+            ClockMode.Custom -> MaterialTheme.colors.primary
             else -> MaterialTheme.colors.onSecondary
         }
     }
@@ -172,7 +174,7 @@ fun ClockPickerScreen(
                     )
                 )
                 Text(
-                    text = chessMode.name,
+                    text = clockMode.name,
                     style = MaterialTheme.typography.h4.copy(
                         color = animatedColor,
                         fontWeight = FontWeight.Normal
@@ -192,7 +194,7 @@ fun ClockPickerScreen(
                     onClick = {
                         animateModeColor = true
                         context.playSound()
-                        chessMode = ChessMode.Custom
+                        clockMode = ClockMode.Custom
                     }
                 )
                 OutlineIcon(
@@ -203,7 +205,7 @@ fun ClockPickerScreen(
                     onClick = {
                         animateModeColor = true
                         context.playSound()
-                        chessMode = ChessMode.Bullet
+                        clockMode = ClockMode.Bullet
                     }
                 )
                 OutlineIcon(
@@ -214,7 +216,7 @@ fun ClockPickerScreen(
                     onClick = {
                         animateModeColor = true
                         context.playSound()
-                        chessMode = ChessMode.Blitz
+                        clockMode = ClockMode.Blitz
                     }
                 )
                 OutlineIcon(
@@ -225,7 +227,7 @@ fun ClockPickerScreen(
                     onClick = {
                         animateModeColor = true
                         context.playSound()
-                        chessMode = ChessMode.Rapid
+                        clockMode = ClockMode.Rapid
                     }
                 )
                 OutlineIcon(
@@ -236,7 +238,7 @@ fun ClockPickerScreen(
                     onClick = {
                         animateModeColor = true
                         context.playSound()
-                        chessMode = ChessMode.Classical
+                        clockMode = ClockMode.Classical
                     }
                 )
             }
@@ -290,7 +292,7 @@ fun ClockPickerScreen(
             onValueChange = {
                 context.playSound()
                 pickerValue = it
-                chessMode = ChessMode.Custom
+                clockMode = ClockMode.Custom
             }
         )
         BasicButton(
@@ -305,7 +307,7 @@ fun ClockPickerScreen(
             ),
             shape = MaterialTheme.shapes.small.copy(CornerSize(0.dp)),
         ) {
-            onTimeSelected(pickerValue)
+            onTimeSelected(clockMode, pickerValue.copy(increment = increment))
         }
     }
 }
