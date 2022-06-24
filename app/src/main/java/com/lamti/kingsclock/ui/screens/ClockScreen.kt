@@ -26,7 +26,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -61,8 +60,6 @@ import com.lamti.kingsclock.ui.uistate.UIEvent
 import com.lamti.kingsclock.ui.uistate.UIState
 import kotlinx.coroutines.channels.Channel
 
-private const val START = "start"
-private const val RESUME = "resume"
 
 @Composable
 fun ClockScreen(
@@ -81,20 +78,9 @@ fun ClockScreen(
     val blacksStartedTranslationValue = -screenHeight
     val whitesStartedTranslationValue = screenHeight
 
-    var turn by rememberSaveable { mutableStateOf(Turn.Whites) }
 
-    var showMenuCloseIcon by rememberSaveable { mutableStateOf(false) }
-    var showBlacksClock by rememberSaveable { mutableStateOf(false) }
-    var showWhitesClock by rememberSaveable { mutableStateOf(false) }
-    var showRestartButton by rememberSaveable { mutableStateOf(false) }
-    var showCloseButton by rememberSaveable { mutableStateOf(false) }
-
-    var showTouchIndicator by rememberSaveable { mutableStateOf(false) }
-    var rotateTouchIndicator by rememberSaveable { mutableStateOf(false) }
-    val touchIndicatorRotateValue by animateFloatAsState(if (rotateTouchIndicator) 180f else 0f)
-
+    val touchIndicatorRotateValue by animateFloatAsState(if (state.rotateTouchIndicator) 180f else 0f)
     val playButtonScale by animateFloatAsState(if (state.showPauseWidgets) 1f else 0f)
-    var playButtonText by remember { mutableStateOf(START) }
 
     val blacksTimerTranslationX by animateDpAsState(
         targetValue = if (state.showPauseWidgets) 0.dp else -screenWidth,
@@ -113,18 +99,18 @@ fun ClockScreen(
         ),
     )
     val settingsIconTranslationY by animateDpAsState(
-        targetValue = if (state.showPauseWidgets && !showMenuCloseIcon) screenHeight / 2.7f else screenHeight,
+        targetValue = if (state.showPauseWidgets && !state.showMenuCloseIcon) screenHeight / 2.7f else screenHeight,
         animationSpec = tween(
             durationMillis = 100,
-            delayMillis = if (state.showPauseWidgets && !showMenuCloseIcon) 170 else 25,
+            delayMillis = if (state.showPauseWidgets && !state.showMenuCloseIcon) 170 else 25,
             easing = FastOutSlowInEasing
         ),
     )
     val menuCloseIconTranslationY by animateDpAsState(
-        targetValue = if (showMenuCloseIcon) screenHeight / 2.7f else screenHeight,
+        targetValue = if (state.showMenuCloseIcon) screenHeight / 2.7f else screenHeight,
         animationSpec = tween(
             durationMillis = 100,
-            delayMillis = if (showMenuCloseIcon) 170 else 25,
+            delayMillis = if (state.showMenuCloseIcon) 170 else 25,
             easing = FastOutSlowInEasing
         ),
     )
@@ -146,51 +132,11 @@ fun ClockScreen(
         }
     )
 
-    LaunchedEffect(state.clockState) {
-        when (state.clockState) {
-            ClockState.Idle -> {
-                playButtonText = START
-                showBlacksClock = false
-                showWhitesClock = false
-                showRestartButton = false
-                showCloseButton = false
-                showMenuCloseIcon = false
-                showTouchIndicator = false
-                rotateTouchIndicator = false
-            }
-            ClockState.Started -> {
-                showBlacksClock = true
-                showWhitesClock = true
-                showRestartButton = false
-                showCloseButton = false
-                showMenuCloseIcon = false
-                if (!rotateTouchIndicator) showTouchIndicator = true
-            }
-            ClockState.Paused -> {
-                playButtonText = RESUME
-                showBlacksClock = false
-                showWhitesClock = false
-                showRestartButton = false
-                showCloseButton = false
-                showMenuCloseIcon = true
-                showTouchIndicator = false
-            }
-            ClockState.Finished -> {
-                showBlacksClock = true
-                showWhitesClock = true
-                showRestartButton = true
-                showCloseButton = true
-                showMenuCloseIcon = false
-                showTouchIndicator = false
-            }
-        }
-    }
-
     ClockScreen(
         clockState = state.clockState,
-        turn = turn,
+        turn = state.turn,
         maxTimeMillis = (state.clock.minutes * 60 * 1000L) + (state.clock.seconds * 1000L),
-        playButtonText = playButtonText,
+        playButtonText = state.startButtonText,
         screenWidth = screenWidth,
         blacksClockTranslationY = blacksClockTranslationY,
         whitesClockTranslationY = whitesClockTranslationY,
@@ -199,29 +145,19 @@ fun ClockScreen(
         whitesTimerTranslationX = whitesTimerTranslationX,
         settingsIconTranslationY = settingsIconTranslationY,
         menuCloseIconTranslationY = menuCloseIconTranslationY,
-        showBlacksClock = showBlacksClock,
-        showWhitesClock = showWhitesClock,
-        showRestartButton = showRestartButton,
-        showCloseButton = showCloseButton,
-        showTutorial = showTouchIndicator,
+        showBlacksClock = state.showBlacksClock,
+        showWhitesClock = state.showWhitesClock,
+        showRestartButton = state.showRestartButton,
+        showCloseButton = state.showCloseButton,
+        showTutorial = state.showTouchIndicator,
         touchIndicatorRotateValue = touchIndicatorRotateValue,
-        onBackgroundClicked = {
-            if (rotateTouchIndicator) showTouchIndicator = false
-            rotateTouchIndicator = true
-            turn = turn.changeClock()
-        },
-        onStartButtonClicked = { eventChannel.trySend(UIEvent.ClockStateChanged(ClockState.Started)) },
-        onPauseButtonClicked = { eventChannel.trySend(UIEvent.ClockStateChanged(ClockState.Paused)) },
-        onBlacksTimerFinished = { eventChannel.trySend(UIEvent.ClockStateChanged(ClockState.Finished)) },
-        onWhitesTimerFinished = { eventChannel.trySend(UIEvent.ClockStateChanged(ClockState.Finished)) },
-        onRestartButtonClicked = {
-            turn = Turn.Whites
-            eventChannel.trySend(UIEvent.ClockStateChanged(ClockState.Started))
-        },
-        onCloseButtonClicked = {
-            turn = Turn.Whites
-            eventChannel.trySend(UIEvent.ClockStateChanged(ClockState.Idle))
-        },
+        onBackgroundClicked = { eventChannel.trySend(UIEvent.BackgroundClicked) },
+        onStartButtonClicked = { eventChannel.trySend(UIEvent.StartButtonClicked) },
+        onPauseButtonClicked = { eventChannel.trySend(UIEvent.PauseButtonClicked) },
+        onBlacksTimerFinished = { eventChannel.trySend(UIEvent.BlacksTimerFinished) },
+        onWhitesTimerFinished = { eventChannel.trySend(UIEvent.WhitesTimerFinished) },
+        onRestartButtonClicked = { eventChannel.trySend(UIEvent.RestartButtonClicked) },
+        onCloseButtonClicked = { eventChannel.trySend(UIEvent.CloseButtonClicked) },
         onSettingsClicked = { eventChannel.trySend(UIEvent.SettingsClicked) }
     )
 }

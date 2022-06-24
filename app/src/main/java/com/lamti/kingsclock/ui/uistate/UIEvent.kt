@@ -4,9 +4,21 @@ sealed class UIEvent {
 
     data class ClockSelected(val clock: ChessClock) : UIEvent()
 
-    data class ClockStateChanged(val clockState: ClockState) : UIEvent()
-
     object Initialize : UIEvent()
+
+    object BackgroundClicked : UIEvent()
+
+    object StartButtonClicked : UIEvent()
+
+    object PauseButtonClicked : UIEvent()
+
+    object BlacksTimerFinished : UIEvent()
+
+    object WhitesTimerFinished : UIEvent()
+
+    object RestartButtonClicked : UIEvent()
+
+    object CloseButtonClicked : UIEvent()
 
     object SettingsClicked : UIEvent()
 }

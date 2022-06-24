@@ -57,7 +57,9 @@ class MainActivity : ComponentActivity() {
         hideSystemUI()
         handleCameraCutout()
 
-        events().onEach(viewModel::sendEvent).launchIn(lifecycleScope)
+        lifecycleScope.launchWhenCreated {
+            events().onEach(viewModel::sendEvent).launchIn(lifecycleScope)
+        }
 
         setContent {
             KingsClockTheme {
