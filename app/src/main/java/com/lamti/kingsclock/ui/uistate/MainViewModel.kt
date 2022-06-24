@@ -102,6 +102,7 @@ class MainViewModel : ViewModel() {
             )
         }
         startProperTimer()
+        addIncrement()
     }
 
     private fun onCloseButtonClicked() {
@@ -193,13 +194,18 @@ class MainViewModel : ViewModel() {
             Turn.Blacks -> {
                 _uiState.value.whitesTimer.pause()
                 _uiState.value.blacksTimer.start()
-                _uiState.value.whitesTimer.addIncrement(10)
             }
             Turn.Whites -> {
                 _uiState.value.whitesTimer.start()
                 _uiState.value.blacksTimer.pause()
-                _uiState.value.blacksTimer.addIncrement(10)
             }
+        }
+    }
+
+    private fun addIncrement() {
+        when (_uiState.value.turn) {
+            Turn.Blacks -> _uiState.value.whitesTimer.addIncrement(_uiState.value.clock.increment)
+            Turn.Whites -> _uiState.value.blacksTimer.addIncrement(_uiState.value.clock.increment)
         }
     }
 }

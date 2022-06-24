@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Slider
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -47,10 +48,8 @@ import com.lamti.kingsclock.ui.uistate.UIState
 @Composable
 fun ClockPickerScreen(
     modifier: Modifier = Modifier,
-    iconSize: Dp = 58.dp,
-    iconPadding: Dp = 14.dp,
-    miniSpace: Dp = 10.dp,
-    space: Dp = 20.dp,
+    miniSpace: Dp = 12.dp,
+    space: Dp = 24.dp,
     state: UIState,
     onTimeSelected: (ClockMode, ChessClock) -> Unit,
 ) {
@@ -150,140 +149,51 @@ fun ClockPickerScreen(
                 .fillMaxWidth()
                 .padding(space)
         ) {
-            Text(
-                text = "King's Clock",
-                style = MaterialTheme.typography.h2.copy(
-                    color = MaterialTheme.colors.onBackground
-                )
-            )
-            Text(
-                text = "How many minutes (and seconds) do you want to play with?",
-                style = MaterialTheme.typography.body1.copy(color = TextColor)
+            Header()
+            Spacer(modifier = Modifier.size(space))
+            SubTitle(title = "Mode: ", text = clockMode.name, color = animatedColor)
+            Spacer(modifier = Modifier.size(miniSpace))
+            IconsRaw(
+                customIconColor = customIconColor,
+                bulletIconColor = bulletIconColor,
+                blitzIconColor = blitzIconColor,
+                rapidIconColor = rapidIconColor,
+                classicalIconColor = classicalIconColor,
+                onCustomIconClick = {
+                    context.playSound()
+                    animateModeColor = true
+                    clockMode = ClockMode.Custom
+                },
+                onBulletIconClick = {
+                    context.playSound()
+                    animateModeColor = true
+                    clockMode = ClockMode.Bullet
+                },
+                onBlitzClick = {
+                    context.playSound()
+                    animateModeColor = true
+                    clockMode = ClockMode.Blitz
+                },
+                onRapidIconClick = {
+                    context.playSound()
+                    animateModeColor = true
+                    clockMode = ClockMode.Rapid
+                },
+                onClassicalIconClick = {
+                    context.playSound()
+                    animateModeColor = true
+                    clockMode = ClockMode.Classical
+                }
             )
             Spacer(modifier = Modifier.size(space))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Start,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "Mode: ",
-                    style = MaterialTheme.typography.h4.copy(
-                        color = MaterialTheme.colors.onSecondary,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                )
-                Text(
-                    text = clockMode.name,
-                    style = MaterialTheme.typography.h4.copy(
-                        color = animatedColor,
-                        fontWeight = FontWeight.Normal
-                    )
-                )
-            }
+            SubTitle(title = "Increment: ", text = "$increment\"", color = animatedIncrementColor)
             Spacer(modifier = Modifier.size(miniSpace))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+            IncrementSlider(
+                value = increment
             ) {
-                OutlineIcon(
-                    imageID = R.drawable.ic_custom,
-                    size = iconSize,
-                    padding = iconPadding,
-                    borderColor = customIconColor,
-                    onClick = {
-                        animateModeColor = true
-                        context.playSound()
-                        clockMode = ClockMode.Custom
-                    }
-                )
-                OutlineIcon(
-                    imageID = R.drawable.ic_bullet,
-                    size = iconSize,
-                    padding = iconPadding,
-                    borderColor = bulletIconColor,
-                    onClick = {
-                        animateModeColor = true
-                        context.playSound()
-                        clockMode = ClockMode.Bullet
-                    }
-                )
-                OutlineIcon(
-                    imageID = R.drawable.ic_blitz,
-                    size = iconSize,
-                    padding = iconPadding,
-                    borderColor = blitzIconColor,
-                    onClick = {
-                        animateModeColor = true
-                        context.playSound()
-                        clockMode = ClockMode.Blitz
-                    }
-                )
-                OutlineIcon(
-                    imageID = R.drawable.ic_rapid,
-                    size = iconSize,
-                    padding = iconPadding,
-                    borderColor = rapidIconColor,
-                    onClick = {
-                        animateModeColor = true
-                        context.playSound()
-                        clockMode = ClockMode.Rapid
-                    }
-                )
-                OutlineIcon(
-                    imageID = R.drawable.ic_classical,
-                    size = iconSize,
-                    padding = iconPadding,
-                    borderColor = classicalIconColor,
-                    onClick = {
-                        animateModeColor = true
-                        context.playSound()
-                        clockMode = ClockMode.Classical
-                    }
-                )
-            }
-            Spacer(modifier = Modifier.size(space))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Start,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "Increment: ",
-                    style = MaterialTheme.typography.h4.copy(
-                        color = MaterialTheme.colors.onSecondary,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                )
-                Text(
-                    text = "$increment\"",
-                    style = MaterialTheme.typography.h4.copy(
-                        color = animatedIncrementColor,
-                        fontWeight = FontWeight.Normal
-                    )
-                )
-            }
-            Spacer(modifier = Modifier.size(miniSpace))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                OutlineIcon(
-                    imageID = R.drawable.ic_arrow_up,
-                    size = iconSize,
-                    padding = iconPadding,
-                    borderColor = MaterialTheme.colors.onSecondary,
-                    onClick = {
-                        context.playSound()
-                        animateIncrementColor = true
-                        increment = when (increment) {
-                            0 -> 15
-                            15 -> 30
-                            30 -> 60
-                            else -> 0
-                        }
-                    }
-                )
+                context.playSound()
+                animateIncrementColor = true
+                increment = it
             }
         }
         ChessClockPicker(
@@ -312,10 +222,132 @@ fun ClockPickerScreen(
     }
 }
 
+@Composable
+private fun IconsRaw(
+    iconSize: Dp = 58.dp,
+    iconPadding: Dp = 14.dp,
+    customIconColor: androidx.compose.ui.graphics.Color,
+    bulletIconColor: androidx.compose.ui.graphics.Color,
+    blitzIconColor: androidx.compose.ui.graphics.Color,
+    rapidIconColor: androidx.compose.ui.graphics.Color,
+    classicalIconColor: androidx.compose.ui.graphics.Color,
+    onCustomIconClick: () -> Unit,
+    onBulletIconClick: () -> Unit,
+    onBlitzClick: () -> Unit,
+    onRapidIconClick: () -> Unit,
+    onClassicalIconClick: () -> Unit,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        OutlineIcon(
+            imageID = R.drawable.ic_custom,
+            size = iconSize,
+            padding = iconPadding,
+            borderColor = customIconColor,
+            onClick = onCustomIconClick,
+            stroke = 1.dp
+        )
+        OutlineIcon(
+            imageID = R.drawable.ic_bullet,
+            size = iconSize,
+            padding = iconPadding,
+            borderColor = bulletIconColor,
+            onClick = onBulletIconClick,
+            stroke = 1.dp
+        )
+        OutlineIcon(
+            imageID = R.drawable.ic_blitz,
+            size = iconSize,
+            padding = iconPadding,
+            borderColor = blitzIconColor,
+            onClick = onBlitzClick,
+            stroke = 1.dp
+        )
+        OutlineIcon(
+            imageID = R.drawable.ic_rapid,
+            size = iconSize,
+            padding = iconPadding,
+            borderColor = rapidIconColor,
+            onClick = onRapidIconClick,
+            stroke = 1.dp
+        )
+        OutlineIcon(
+            imageID = R.drawable.ic_classical,
+            size = iconSize,
+            padding = iconPadding,
+            borderColor = classicalIconColor,
+            onClick = onClassicalIconClick,
+            stroke = 1.dp
+        )
+    }
+}
+
 fun Context.playSound(sound: Int = R.raw.click) {
     try {
         MediaPlayer.create(this, sound).start()
     } catch (e: Exception) {
         Log.e("TAGARA", "Ex: ${e.message}")
     }
+}
+
+@Composable
+private fun Header() {
+    Text(
+        text = "King's Clock",
+        style = MaterialTheme.typography.h2.copy(
+            color = MaterialTheme.colors.onBackground
+        )
+    )
+    Text(
+        text = "How many minutes (and seconds) do you want to play with?",
+        style = MaterialTheme.typography.body1.copy(color = TextColor)
+    )
+}
+
+@Composable
+private fun SubTitle(
+    modifier: Modifier = Modifier,
+    title: String,
+    text: String,
+    color: androidx.compose.ui.graphics.Color
+) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.Start,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.h5.copy(
+                color = MaterialTheme.colors.onSecondary,
+                fontWeight = FontWeight.Light
+            )
+        )
+        Text(
+            text = text,
+            style = MaterialTheme.typography.h5.copy(
+                color = color,
+                fontWeight = FontWeight.Light
+            )
+        )
+    }
+}
+
+@Composable
+fun IncrementSlider(
+    modifier: Modifier = Modifier,
+    value: Int,
+    range: ClosedFloatingPointRange<Float> = 0f..100f,
+    onValueChange: (Int) -> Unit,
+) {
+    Slider(
+        modifier = modifier,
+        value = value.toFloat(),
+        valueRange = range,
+        onValueChange = {
+            onValueChange(it.toInt())
+        }
+    )
 }

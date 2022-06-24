@@ -181,7 +181,7 @@ private fun ClockScreen(
             maxTimeMillis = (state.clock.minutes * 60 * 1000L) + (state.clock.seconds * 1000L)
         )
         RoundedTextButton(
-            modifier = Modifier.lightScaledColoredShadow(scaleStartButton),
+            modifier = Modifier.startModifier(scaleStartButton),
             buttonSize = screenWidth / 1.75f,
             text = state.startButtonText,
             onClick = {
@@ -242,12 +242,13 @@ private fun ClockScreen(
     }
 }
 
-private fun Modifier.lightScaledColoredShadow(scaleStartButton: Float) = composed {
+private fun Modifier.startModifier(scaleStartButton: Float) = composed {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && MaterialTheme.colors.isLight) {
-        scale(scaleStartButton)
-        drawColoredShadow(color = Blue)
+        this
+            .scale(scaleStartButton)
+            .drawColoredShadow(color = Blue)
     } else {
-        scale(scaleStartButton)
+        this.scale(scaleStartButton)
     }
 }
 
