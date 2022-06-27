@@ -6,6 +6,9 @@ import android.view.WindowInsets
 import android.view.WindowInsetsController
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
+import androidx.activity.OnBackPressedCallback
+import androidx.activity.OnBackPressedDispatcher
+import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -15,8 +18,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
@@ -83,6 +90,16 @@ class MainActivity : ComponentActivity() {
                         ),
                     )
 
+                    BackPressHandler(
+                        onBackPressed = {
+                            if (state.screen == PickerScreen) {
+                                eventChannel.trySend(UIEvent.ClockModeSelected(state.clockMode, state.clock))
+                            } else {
+                                finish()
+                            }
+                        }
+                    )
+
                     when (state.screen) {
                         ClockScreen -> ClockScreen(
                             state = state,
@@ -97,6 +114,30 @@ class MainActivity : ComponentActivity() {
                         )
                     }
                 }
+            }
+        }
+    }
+
+    @Composable
+    fun BackPressHandler(
+        backPressedDispatcher: OnBackPressedDispatcher? = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher,
+        onBackPressed: () -> Unit
+    ) {
+        val currentOnBackPressed by rememberUpdatedState(newValue = onBackPressed)
+
+        val backCallback = remember {
+            object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    currentOnBackPressed()
+                }
+            }
+        }
+
+        DisposableEffect(key1 = backPressedDispatcher) {
+            backPressedDispatcher?.addCallback(backCallback)
+
+            onDispose {
+                backCallback.remove()
             }
         }
     }
