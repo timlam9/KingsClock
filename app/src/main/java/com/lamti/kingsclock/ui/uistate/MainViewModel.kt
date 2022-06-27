@@ -2,37 +2,61 @@ package com.lamti.kingsclock.ui.uistate
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.lamti.kingsclock.PreferencesManager
+import com.lamti.kingsclock.StoredClock
 import com.lamti.kingsclock.ui.screens.Screen.ClockScreen
 import com.lamti.kingsclock.ui.screens.Screen.PickerScreen
 import com.lamti.kingsclock.ui.uistate.UIState.Companion.RESUME
 import com.lamti.kingsclock.ui.uistate.UIState.Companion.START
 import com.lamti.kingsclock.ui.uistate.UIState.Companion.initialState
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class MainViewModel : ViewModel() {
+@HiltViewModel
+class MainViewModel @Inject constructor(
+    private val preferencesManager: PreferencesManager
+) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(initialState)
-    val uiState: StateFlow<UIState> = _uiState.asStateFlow()
+    private val _uiState: MutableStateFlow<UIState> = MutableStateFlow(initialState)
+    val uiState: StateFlow<UIState> = preferencesManager.storedClock.flatMapLatest { storedClock ->
+        val clock = ChessClock(
+            minutes = storedClock.minutes,
+            seconds = storedClock.seconds,
+            increment = storedClock.increment
+        )
+        _uiState.update {
+            it.copy(
+                clock = clock,
+                clockMode = storedClock.mode ?: ClockMode.Custom,
+                whitesTimer = Timer(clock.toMillis()),
+                blacksTimer = Timer(clock.toMillis())
+            )
+        }
+        _uiState
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), initialState)
 
     private val _eventFlow = MutableSharedFlow<UIEvent>(extraBufferCapacity = 16)
 
     init {
         _eventFlow.process().launchIn(viewModelScope)
-        _uiState.onEach {
-            it.whitesTimer.isTimerFinished.onEach { isFinished ->
-                if (isFinished) onWhitesTimerFinished()
-            }.launchIn(viewModelScope)
 
-            it.blacksTimer.isTimerFinished.onEach { isFinished ->
-                if (isFinished) onBlacksTimerFinished()
-            }.launchIn(viewModelScope)
+        _uiState.flatMapLatest {
+            it.whitesTimer.isTimerFinished.combine(it.blacksTimer.isTimerFinished) { white, black ->
+                if (white) onWhitesTimerFinished()
+                if (black) onBlacksTimerFinished()
+            }
         }.launchIn(viewModelScope)
     }
 
@@ -54,16 +78,27 @@ class MainViewModel : ViewModel() {
     }
 
     private fun onClockModeSelected(mode: ClockMode, clock: ChessClock) {
-        val maxTimeMillis = (clock.minutes * 60 * 1000L) + (clock.seconds * 1000L)
-
         _uiState.update {
             _uiState.value.copy(
                 clock = clock,
                 clockMode = mode,
                 screen = ClockScreen,
-                whitesTimer = Timer(maxTimeMillis),
-                blacksTimer = Timer(maxTimeMillis)
+                whitesTimer = Timer(clock.toMillis()),
+                blacksTimer = Timer(clock.toMillis())
             )
+        }
+
+        viewModelScope.launch {
+            with(_uiState.value) {
+                preferencesManager.saveClock(
+                    StoredClock(
+                        minutes = clock.minutes,
+                        seconds = clock.seconds,
+                        increment = clock.increment,
+                        mode = clockMode
+                    )
+                )
+            }
         }
     }
 
@@ -128,7 +163,6 @@ class MainViewModel : ViewModel() {
     private fun onWhitesTimerFinished() {
         onClockStateChanged(ClockState.Finished)
     }
-
 
     private fun onClockStateChanged(clockState: ClockState) {
         _uiState.value = when (clockState) {
