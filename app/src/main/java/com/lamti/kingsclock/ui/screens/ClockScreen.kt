@@ -1,6 +1,5 @@
 package com.lamti.kingsclock.ui.screens
 
-import android.media.MediaPlayer
 import android.os.Build
 import android.util.Log
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -36,6 +35,7 @@ import com.lamti.kingsclock.ui.composables.combound.MainHeader
 import com.lamti.kingsclock.ui.composables.combound.PauseButtons
 import com.lamti.kingsclock.ui.composables.combound.TouchIndicator
 import com.lamti.kingsclock.ui.drawColoredShadow
+import com.lamti.kingsclock.ui.playSound
 import com.lamti.kingsclock.ui.theme.Blue
 import com.lamti.kingsclock.ui.theme.KingsClockTheme
 import com.lamti.kingsclock.ui.theme.Red
@@ -147,7 +147,7 @@ private fun ClockScreen(
 
     LaunchedEffect(sound) {
         try {
-            MediaPlayer.create(context, sound).start()
+            context.playSound(sound)
         } catch (e: Exception) {
             Log.e("TAGARA", "Ex: ${e.message}")
         }

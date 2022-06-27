@@ -1,5 +1,7 @@
 package com.lamti.kingsclock.ui
 
+import android.content.Context
+import android.media.MediaPlayer
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.clickable
@@ -13,6 +15,7 @@ import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.lamti.kingsclock.R
 
 inline fun Modifier.noRippleClickable(enabled: Boolean = true, crossinline onClick: () -> Unit): Modifier = composed {
     clickable(
@@ -53,5 +56,26 @@ fun Modifier.drawColoredShadow(
             borderRadius.toPx(),
             paint
         )
+    }
+}
+
+
+var mediaPlayer: MediaPlayer? = null
+fun Context.playSound(soundID: Int = R.raw.click) {
+    if (mediaPlayer == null) {
+        mediaPlayer = MediaPlayer.create(this, soundID)
+        mediaPlayer?.start()
+    } else {
+        resetMediaPlayer()
+        playSound(soundID)
+    }
+}
+
+private fun resetMediaPlayer() {
+    mediaPlayer?.apply {
+        stop()
+        reset()
+        release()
+        mediaPlayer = null
     }
 }

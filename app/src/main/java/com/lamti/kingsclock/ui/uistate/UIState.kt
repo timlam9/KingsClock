@@ -33,7 +33,7 @@ data class UIState(
         const val RESUME = "resume"
 
         val initialState = UIState(
-            isLoading = false,
+            isLoading = true,
             screen = Screen.ClockScreen,
             clockState = ClockState.Idle,
             turn = Turn.Whites,

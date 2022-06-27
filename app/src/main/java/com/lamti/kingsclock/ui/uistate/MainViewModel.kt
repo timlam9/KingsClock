@@ -41,7 +41,8 @@ class MainViewModel @Inject constructor(
                 clock = clock,
                 clockMode = storedClock.mode ?: ClockMode.Custom,
                 whitesTimer = Timer(clock.toMillis()),
-                blacksTimer = Timer(clock.toMillis())
+                blacksTimer = Timer(clock.toMillis()),
+                isLoading = false
             )
         }
         _uiState

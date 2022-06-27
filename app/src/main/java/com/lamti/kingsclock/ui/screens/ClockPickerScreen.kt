@@ -1,8 +1,5 @@
 package com.lamti.kingsclock.ui.screens
 
-import android.content.Context
-import android.media.MediaPlayer
-import android.util.Log
 import androidx.compose.animation.animateColor
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.RepeatMode
@@ -39,6 +36,7 @@ import com.lamti.kingsclock.R
 import com.lamti.kingsclock.ui.composables.basic.BasicButton
 import com.lamti.kingsclock.ui.composables.basic.OutlineIcon
 import com.lamti.kingsclock.ui.composables.picker.ChessClockPicker
+import com.lamti.kingsclock.ui.playSound
 import com.lamti.kingsclock.ui.theme.Blue
 import com.lamti.kingsclock.ui.theme.TextColor
 import com.lamti.kingsclock.ui.uistate.ChessClock
@@ -281,14 +279,6 @@ private fun IconsRaw(
             onClick = onClassicalIconClick,
             stroke = 1.dp
         )
-    }
-}
-
-fun Context.playSound(sound: Int = R.raw.click) {
-    try {
-        MediaPlayer.create(this, sound).start()
-    } catch (e: Exception) {
-        Log.e("TAGARA", "Ex: ${e.message}")
     }
 }
 
