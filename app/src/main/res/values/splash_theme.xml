@@ -3,7 +3,7 @@
 
     <style name="Theme.SplashKing" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">#FFFFFFFF</item>
-        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_king_clock</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_kings_clock_logo</item>
         <item name="postSplashScreenTheme">@style/Theme.KingsClock</item>
     </style>
 </resources>
