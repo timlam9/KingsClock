@@ -26,6 +26,7 @@ fun OutlineIcon(
     backgroundColor: Color = Color.Transparent,
     stroke: Dp = 4.dp,
     padding: Dp = 0.dp,
+    enabled: Boolean = true,
     onClick: () -> Unit = {}
 ) {
     IconButton(
@@ -38,7 +39,8 @@ fun OutlineIcon(
                 color = borderColor,
                 shape = RoundedCornerShape(60)
             ),
-        onClick = onClick
+        onClick = onClick,
+        enabled = enabled
     ) {
         Icon(
             modifier = Modifier.padding(padding),

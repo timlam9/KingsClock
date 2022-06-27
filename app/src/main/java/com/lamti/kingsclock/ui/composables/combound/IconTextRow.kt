@@ -46,6 +46,7 @@ fun IconTextRow(
             padding = iconPadding,
             borderColor = iconBorderColor,
             backgroundColor = iconBackgroundColor,
+            enabled = false,
             onClick = onIconClicked
         )
         Spacer(modifier = Modifier.size(20.dp))

@@ -28,6 +28,7 @@ fun OutlinedButton(
     textColor: Color = borderColor,
     shape: Shape = MaterialTheme.shapes.medium.copy(CornerSize(60)),
     stroke: Dp = 4.dp,
+    enabled: Boolean = false,
     onclick: () -> Unit
 ) {
     androidx.compose.material.OutlinedButton(
@@ -35,6 +36,7 @@ fun OutlinedButton(
         modifier = modifier.size(width, height),
         border = BorderStroke(stroke, borderColor),
         shape = shape,
+        enabled = enabled,
         colors = ButtonDefaults.outlinedButtonColors(backgroundColor = backgroundColor)
     ) {
         Text(
