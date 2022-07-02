@@ -37,22 +37,24 @@ fun FinishButtons(
         AnimatedVisibility(
             visible = showRestartButton,
             enter = slideInHorizontally(
-                tween(
+                animationSpec = tween(
                     durationMillis = 120,
                     easing = FastOutSlowInEasing
-                )
-            ) {
-                with(density) { -300.dp.roundToPx() }
-            },
+                ),
+                initialOffsetX = {
+                    with(density) { -300.dp.roundToPx() }
+                }
+            ),
             exit = slideOutHorizontally(
-                tween(
+                animationSpec = tween(
                     durationMillis = 120,
                     delayMillis = 50,
                     easing = FastOutSlowInEasing
-                )
-            ) {
-                with(density) { -300.dp.roundToPx() }
-            }
+                ),
+                targetOffsetX = {
+                    with(density) { -300.dp.roundToPx() }
+                }
+            )
         ) {
             OutlinedButton(
                 text = "Restart",
@@ -63,22 +65,22 @@ fun FinishButtons(
         AnimatedVisibility(
             visible = showCloseButton,
             enter = slideInHorizontally(
-                tween(
+                animationSpec = tween(
                     durationMillis = 120,
                     delayMillis = 50,
                     easing = FastOutSlowInEasing
-                )
-            ) {
-                with(density) { 300.dp.roundToPx() }
-            },
+                ),
+                initialOffsetX = { with(density) { 300.dp.roundToPx() } }
+            ),
             exit = slideOutHorizontally(
-                tween(
+                animationSpec = tween(
                     durationMillis = 120,
                     easing = FastOutSlowInEasing
-                )
-            ) {
-                with(density) { 300.dp.roundToPx() }
-            }
+                ),
+                targetOffsetX = {
+                    with(density) { 300.dp.roundToPx() }
+                }
+            )
         ) {
             OutlineIcon(onClick = onCloseButtonClicked, imageID = R.drawable.ic_close)
         }

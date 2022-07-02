@@ -32,12 +32,16 @@ fun PauseButtons(
     AnimatedVisibility(showButtons) {
         AnimatedVisibility(
             visible = showBlacksClock && enabledClockState == Turn.Blacks,
-            enter = slideInHorizontally {
-                with(density) { -300.dp.roundToPx() }
-            },
-            exit = slideOutHorizontally {
-                with(density) { -300.dp.roundToPx() }
-            }
+            enter = slideInHorizontally(
+                initialOffsetX = {
+                    with(density) { -300.dp.roundToPx() }
+                }
+            ),
+            exit = slideOutHorizontally(
+                targetOffsetX = {
+                    with(density) { -300.dp.roundToPx() }
+                }
+            )
         ) {
             RoundedIcon(
                 modifier = Modifier
@@ -51,12 +55,16 @@ fun PauseButtons(
         }
         AnimatedVisibility(
             visible = showWhitesClock && enabledClockState == Turn.Whites,
-            enter = slideInHorizontally {
-                with(density) { 300.dp.roundToPx() }
-            },
-            exit = slideOutHorizontally {
+            enter = slideInHorizontally(
+                initialOffsetX = {
                 with(density) { 300.dp.roundToPx() }
             }
+            ),
+            exit = slideOutHorizontally(
+                targetOffsetX = {
+                with(density) { 300.dp.roundToPx() }
+            }
+            )
         ) {
             RoundedIcon(
                 modifier = Modifier

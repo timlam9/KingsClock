@@ -291,7 +291,7 @@ private fun Header() {
         )
     )
     Text(
-        text = "How many minutes (and seconds) do you want to play with?",
+        text = "How many minutes do you want to play with?",
         style = MaterialTheme.typography.body1.copy(color = TextColor)
     )
 }
