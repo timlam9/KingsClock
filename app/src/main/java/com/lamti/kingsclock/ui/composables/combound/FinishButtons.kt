@@ -16,8 +16,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import com.lamti.kingsclock.R
+import com.lamti.kingsclock.ui.composables.basic.OutlineButton
 import com.lamti.kingsclock.ui.composables.basic.OutlineIcon
-import com.lamti.kingsclock.ui.composables.basic.OutlinedButton
 
 @Composable
 fun FinishButtons(
@@ -56,8 +56,9 @@ fun FinishButtons(
                 }
             )
         ) {
-            OutlinedButton(
+            OutlineButton(
                 text = "Restart",
+                enabled = true,
                 onclick = onRestartButtonClicked
             )
         }

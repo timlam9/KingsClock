@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.OutlinedButton
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -17,7 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun OutlinedButton(
+fun OutlineButton(
     modifier: Modifier = Modifier,
     text: String,
     width: Dp = 150.dp,
@@ -31,7 +32,7 @@ fun OutlinedButton(
     enabled: Boolean = false,
     onclick: () -> Unit
 ) {
-    androidx.compose.material.OutlinedButton(
+    OutlinedButton(
         onClick = onclick,
         modifier = modifier.size(width, height),
         border = BorderStroke(stroke, borderColor),

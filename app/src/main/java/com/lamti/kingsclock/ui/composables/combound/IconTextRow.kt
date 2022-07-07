@@ -13,8 +13,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lamti.kingsclock.R
+import com.lamti.kingsclock.ui.composables.basic.OutlineButton
 import com.lamti.kingsclock.ui.composables.basic.OutlineIcon
-import com.lamti.kingsclock.ui.composables.basic.OutlinedButton
 
 @Composable
 fun IconTextRow(
@@ -50,7 +50,7 @@ fun IconTextRow(
             onClick = onIconClicked
         )
         Spacer(modifier = Modifier.size(20.dp))
-        OutlinedButton(
+        OutlineButton(
             modifier = Modifier.weight(1f),
             text = text,
             fontSize = 32.sp,

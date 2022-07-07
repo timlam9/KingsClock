@@ -126,7 +126,7 @@ class MainViewModel @Inject constructor(
                 clockState = ClockState.Started
             )
         }
-        onClockStateChanged(_uiState.value.clockState)
+        onClockStateChanged(ClockState.Started)
     }
 
     private fun onBackgroundClicked() {
