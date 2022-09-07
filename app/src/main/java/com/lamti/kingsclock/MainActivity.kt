@@ -65,6 +65,7 @@ class MainActivity : ComponentActivity() {
 
         hideSystemUI()
         handleCameraCutout()
+        preventScreenTimeout()
 
         lifecycleScope.launchWhenCreated {
             events().onEach(viewModel::sendEvent).launchIn(lifecycleScope)
@@ -173,5 +174,9 @@ class MainActivity : ComponentActivity() {
             window.attributes.layoutInDisplayCutoutMode =
                 WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
         }
+    }
+
+    private fun preventScreenTimeout() {
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
     }
 }
