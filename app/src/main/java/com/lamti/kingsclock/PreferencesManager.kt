@@ -8,6 +8,9 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.lamti.kingsclock.ui.uistate.ClockMode
+import com.lamti.kingsclock.ui.uistate.UIState.Companion.INITIAL_INCREMENT
+import com.lamti.kingsclock.ui.uistate.UIState.Companion.INITIAL_MINUTES
+import com.lamti.kingsclock.ui.uistate.UIState.Companion.INITIAL_SECONDS
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -33,9 +36,9 @@ class PreferencesManager(private val context: Context) {
         .map { preferences ->
             preferences.run {
                 StoredClock(
-                    minutes = get(CLOCK_MINUTES) ?: 20,
-                    seconds = get(CLOCK_SECONDS) ?: 0,
-                    increment = get(CLOCK_INCREMENT) ?: 0,
+                    minutes = get(CLOCK_MINUTES) ?: INITIAL_MINUTES,
+                    seconds = get(CLOCK_SECONDS) ?: INITIAL_SECONDS,
+                    increment = get(CLOCK_INCREMENT) ?: INITIAL_INCREMENT,
                     mode = get(CLOCK_MODE).toClockMode()
                 )
             }

@@ -24,8 +24,8 @@ data class UIState(
 
     companion object {
 
-        const val INITIAL_MINUTES = 0
-        const val INITIAL_SECONDS = 30
+        const val INITIAL_MINUTES = 3
+        const val INITIAL_SECONDS = 0
         const val INITIAL_INCREMENT = 0
         private const val ONE_MILLI = 1000L
         private const val MAX_TIME_MILLIS = INITIAL_SECONDS * ONE_MILLI
