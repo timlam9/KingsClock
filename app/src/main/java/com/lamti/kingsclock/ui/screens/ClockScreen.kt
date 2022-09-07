@@ -193,8 +193,8 @@ private fun ClockScreen(
             screenWidth = screenWidth,
             blacksTimerTranslationX = blacksTimerTranslationX,
             whitesTimerTranslationX = whitesTimerTranslationX,
-            blacksTimerText = state.blacksTimer.formattedTime,
-            whitesTimerText = state.whitesTimer.formattedTime
+            blacksTimerText = "${state.blacksTimer.formattedTime.subSequence(0..4)}  +${state.clock.increment}\"",
+            whitesTimerText = "${state.whitesTimer.formattedTime.subSequence(0..4)}  +${state.clock.increment}\""
         )
         PauseButtons(
             showBlacksClock = state.showBlacksClock,
