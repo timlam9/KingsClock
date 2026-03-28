@@ -145,8 +145,8 @@ private fun ClockScreen(
         if (state.clockState == ClockState.Finished) sound = R.raw.game_over
     }
 
-    LaunchedEffect(sound, state.soundEffectsEnabled) {
-        if (!state.soundEffectsEnabled) return@LaunchedEffect
+    LaunchedEffect(sound, state.soundEffectsEnabled, state.isLoading) {
+        if (state.isLoading || !state.soundEffectsEnabled) return@LaunchedEffect
         try {
             context.playSound(sound)
         } catch (e: Exception) {

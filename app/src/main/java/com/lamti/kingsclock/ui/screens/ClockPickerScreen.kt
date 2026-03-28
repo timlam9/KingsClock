@@ -216,7 +216,7 @@ fun ClockPickerScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(85.dp),
-            text = "Select",
+            text = "Save",
             style = MaterialTheme.typography.button.copy(
                 color = MaterialTheme.colors.background,
                 fontSize = 24.sp,
