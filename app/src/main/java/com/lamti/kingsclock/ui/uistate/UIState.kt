@@ -19,7 +19,8 @@ data class UIState(
     val showCloseButton: Boolean,
     val showTouchIndicator: Boolean,
     val rotateTouchIndicator: Boolean,
-    val startButtonText: String
+    val startButtonText: String,
+    val soundEffectsEnabled: Boolean
 ) {
 
     companion object {
@@ -50,6 +51,7 @@ data class UIState(
             showTouchIndicator = false,
             rotateTouchIndicator = false,
             startButtonText = START,
+            soundEffectsEnabled = true,
         )
     }
 }

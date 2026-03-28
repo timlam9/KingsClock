@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
@@ -19,6 +20,7 @@ data class StoredClock(
     val seconds: Int,
     val increment: Int,
     val mode: ClockMode?,
+    val soundEffectsEnabled: Boolean,
 )
 
 class PreferencesManager(private val context: Context) {
@@ -32,6 +34,12 @@ class PreferencesManager(private val context: Context) {
         }
     }
 
+    suspend fun saveSoundEffectsEnabled(enabled: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[SOUND_EFFECTS_ENABLED] = enabled
+        }
+    }
+
     val storedClock: Flow<StoredClock> = context.dataStore.data
         .map { preferences ->
             preferences.run {
@@ -39,7 +47,8 @@ class PreferencesManager(private val context: Context) {
                     minutes = get(CLOCK_MINUTES) ?: INITIAL_MINUTES,
                     seconds = get(CLOCK_SECONDS) ?: INITIAL_SECONDS,
                     increment = get(CLOCK_INCREMENT) ?: INITIAL_INCREMENT,
-                    mode = get(CLOCK_MODE).toClockMode()
+                    mode = get(CLOCK_MODE).toClockMode(),
+                    soundEffectsEnabled = get(SOUND_EFFECTS_ENABLED) ?: true
                 )
             }
         }
@@ -52,6 +61,7 @@ class PreferencesManager(private val context: Context) {
         private val CLOCK_SECONDS = intPreferencesKey("clock_seconds")
         private val CLOCK_INCREMENT = intPreferencesKey("clock_increment")
         private val CLOCK_MODE = stringPreferencesKey("clock_mode")
+        private val SOUND_EFFECTS_ENABLED = booleanPreferencesKey("sound_effects_enabled")
     }
 }
 

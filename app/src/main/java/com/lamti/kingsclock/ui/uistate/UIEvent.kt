@@ -21,4 +21,6 @@ sealed class UIEvent {
     object CloseButtonClicked : UIEvent()
 
     object SettingsClicked : UIEvent()
+
+    data class SoundEffectsToggled(val enabled: Boolean) : UIEvent()
 }

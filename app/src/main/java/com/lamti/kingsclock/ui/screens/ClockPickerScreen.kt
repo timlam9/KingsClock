@@ -18,6 +18,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Slider
+import androidx.compose.material.Switch
+import androidx.compose.material.SwitchDefaults
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -27,6 +29,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
@@ -50,6 +53,7 @@ fun ClockPickerScreen(
     space: Dp = 24.dp,
     state: UIState,
     onTimeSelected: (ClockMode, ChessClock) -> Unit,
+    onSoundEffectsToggled: (Boolean) -> Unit,
 ) {
     val context = LocalContext.current
     var increment: Int by remember { mutableStateOf(state.clock.increment) }
@@ -103,7 +107,7 @@ fun ClockPickerScreen(
     LaunchedEffect(clockMode) { if (clockMode != ClockMode.Custom) pickerValue = clockMode.clock }
 
     LaunchedEffect(true) {
-        context.playSound()
+        if (state.soundEffectsEnabled) context.playSound()
     }
 
     val bulletIconColor by transition.animateColor(label = "color") { mode ->
@@ -158,27 +162,27 @@ fun ClockPickerScreen(
                 rapidIconColor = rapidIconColor,
                 classicalIconColor = classicalIconColor,
                 onCustomIconClick = {
-                    context.playSound()
+                    if (state.soundEffectsEnabled) context.playSound()
                     animateModeColor = true
                     clockMode = ClockMode.Custom
                 },
                 onBulletIconClick = {
-                    context.playSound()
+                    if (state.soundEffectsEnabled) context.playSound()
                     animateModeColor = true
                     clockMode = ClockMode.Bullet
                 },
                 onBlitzClick = {
-                    context.playSound()
+                    if (state.soundEffectsEnabled) context.playSound()
                     animateModeColor = true
                     clockMode = ClockMode.Blitz
                 },
                 onRapidIconClick = {
-                    context.playSound()
+                    if (state.soundEffectsEnabled) context.playSound()
                     animateModeColor = true
                     clockMode = ClockMode.Rapid
                 },
                 onClassicalIconClick = {
-                    context.playSound()
+                    if (state.soundEffectsEnabled) context.playSound()
                     animateModeColor = true
                     clockMode = ClockMode.Classical
                 }
@@ -189,16 +193,21 @@ fun ClockPickerScreen(
             IncrementSlider(
                 value = increment
             ) {
-                context.playSound()
+                if (state.soundEffectsEnabled) context.playSound()
                 animateIncrementColor = true
                 increment = it
             }
+            Spacer(modifier = Modifier.size(space))
+            SoundEffectsSetting(
+                enabled = state.soundEffectsEnabled,
+                onToggle = onSoundEffectsToggled
+            )
         }
         ChessClockPicker(
             value = pickerValue,
             textColor = animatedTimeColor,
             onValueChange = {
-                context.playSound()
+                if (state.soundEffectsEnabled) context.playSound()
                 pickerValue = it
                 clockMode = ClockMode.Custom
             }
@@ -340,4 +349,34 @@ fun IncrementSlider(
             onValueChange(it.toInt())
         }
     )
+}
+
+@Composable
+private fun SoundEffectsSetting(
+    enabled: Boolean,
+    onToggle: (Boolean) -> Unit,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = "Sound effects",
+            style = MaterialTheme.typography.h5.copy(
+                color = MaterialTheme.colors.onSecondary,
+                fontWeight = FontWeight.Light
+            )
+        )
+        Switch(
+            checked = enabled,
+            onCheckedChange = onToggle,
+            colors = SwitchDefaults.colors(
+                checkedThumbColor = Blue,
+                uncheckedThumbColor = MaterialTheme.colors.onSecondary,
+                checkedTrackColor = Blue.copy(alpha = 0.5f),
+                uncheckedTrackColor = Color.Gray.copy(alpha = 0.5f),
+            )
+        )
+    }
 }

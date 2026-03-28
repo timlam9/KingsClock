@@ -42,6 +42,7 @@ class MainViewModel @Inject constructor(
                 clockMode = storedClock.mode ?: ClockMode.Custom,
                 whitesTimer = Timer(clock.toMillis()),
                 blacksTimer = Timer(clock.toMillis()),
+                soundEffectsEnabled = storedClock.soundEffectsEnabled,
                 isLoading = false
             )
         }
@@ -74,6 +75,7 @@ class MainViewModel @Inject constructor(
             UIEvent.RestartButtonClicked -> onRestartButtonClicked()
             UIEvent.CloseButtonClicked -> onCloseButtonClicked()
             UIEvent.SettingsClicked -> onSettingsButtonClicked()
+            is UIEvent.SoundEffectsToggled -> onSoundEffectsToggled(it.enabled)
             is UIEvent.ClockModeSelected -> onClockModeSelected(it.mode, it.clock)
         }
     }
@@ -96,7 +98,8 @@ class MainViewModel @Inject constructor(
                         minutes = clock.minutes,
                         seconds = clock.seconds,
                         increment = clock.increment,
-                        mode = clockMode
+                        mode = clockMode,
+                        soundEffectsEnabled = soundEffectsEnabled
                     )
                 )
             }
@@ -106,6 +109,13 @@ class MainViewModel @Inject constructor(
     private fun onInitialize() {
         _uiState.update {
             _uiState.value.copy(showPauseWidgets = true)
+        }
+    }
+
+    private fun onSoundEffectsToggled(enabled: Boolean) {
+        _uiState.update { _uiState.value.copy(soundEffectsEnabled = enabled) }
+        viewModelScope.launch {
+            preferencesManager.saveSoundEffectsEnabled(enabled)
         }
     }
 

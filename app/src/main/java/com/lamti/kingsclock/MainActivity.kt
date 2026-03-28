@@ -111,6 +111,9 @@ class MainActivity : ComponentActivity() {
                             state = state,
                             onTimeSelected = { mode, clock ->
                                 eventChannel.trySend(UIEvent.ClockModeSelected(mode, clock))
+                            },
+                            onSoundEffectsToggled = { enabled ->
+                                eventChannel.trySend(UIEvent.SoundEffectsToggled(enabled))
                             }
                         )
                     }
